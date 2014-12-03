@@ -1,8 +1,8 @@
 var spotlight = require('./spotlight'),
-    estraverse = require('estraverse'),
-    esquery = require('esquery'),
+    printer = require('./printer'),
+    parser = require('./parser'),
     esprima = require('esprima'),
-    beautify = require('js-beautify').js_beautify;
+    esquery = require('esquery');
 
 
 
@@ -30,18 +30,9 @@ function then(fn) {
 
 
 
-module.exports = function(ast, callback) {
+module.exports = function(code, callback) {
 
-  // We build the parenting backlink needed for the next steps in the compilation.
-  estraverse.traverse(ast, {
-    enter: function(n, p) {
-      if (n.parent) {
-        console.log('WARNING !!!', n);
-      }
-
-      n.parent = p;
-    }
-  })
+  var ast = parser(String(code));
 
   results = esquery.query(ast, 'CallExpression > FunctionExpression');
   spotlight(results, function(err, res) {
@@ -67,11 +58,9 @@ module.exports = function(ast, callback) {
 
     })
 
-    console.log(' --- ');
+    var code = printer(ast);
 
-    console.log(beautify(require('escodegen').generate(ast), { indent_size: 2 }));
-
-    console.log(' --- ');
+    callback(null, code);
 
   });
 }

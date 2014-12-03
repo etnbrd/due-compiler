@@ -10,10 +10,12 @@
   "author": "Etienne Brodu <etn@etnbrd.com> (http://etnbrd.com/)",
   "license": "ISC",
   "devDependencies": {
+    "due": "0.0.7",
     "mocha": "^2.0.1"
   },
   "dependencies": {
     "escodegen": "^1.4.1",
+    "escope": "^1.0.1",
     "esprima": "^1.2.2",
     "esquery": "^0.3.0",
     "estraverse": "^1.8.0",

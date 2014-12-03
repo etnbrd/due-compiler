@@ -1,0 +1,22 @@
+{
+  "name": "vow-compiler",
+  "version": "0.0.1",
+  "description": "A compiler to transform pyramid of callback into sequence of Vows",
+  "main": "src/index.js",
+  "bin": "bin/flx-compiler.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "author": "Etienne Brodu <etn@etnbrd.com> (http://etnbrd.com/)",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^2.0.1"
+  },
+  "dependencies": {
+    "escodegen": "^1.4.1",
+    "esprima": "^1.2.2",
+    "esquery": "^0.3.0",
+    "estraverse": "^1.8.0",
+    "js-beautify": "^1.5.4"
+  }
+}

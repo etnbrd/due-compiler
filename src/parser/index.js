@@ -1,19 +1,71 @@
 var esprima = require('esprima'),
+    escope = require('escope'),
+    esquery = require('esquery'),
     estraverse = require('estraverse');
 
-module.exports = function(code) {
-  var ast = esprima.parse(String(code));
+function populate(variable) {
 
-  // We build the parenting backlink needed for the next steps in the compilation.
-  estraverse.traverse(ast, {
-    enter: function(n, p) {
-      if (n.parent) {
-        console.log('WARNING !!!', n);
+  function local(scope, variable) {
+    scope.references.forEach(function(reference) {
+      if (reference.identifier.name === variable.name) {
+        variable.references.push(reference);
+        reference.resolved = variable;
+      }
+    });
+  }
+
+  // populate the references array of `variable` with all references from all nested child scope
+  function global(scopes, variable) {
+    scopes.forEach(function(scope) {
+      // Break when another variable of the same name is declared
+      if (scope.variables.some(function(_variable) {
+            return _variable.name === variable.name;
+          })) {
+        return;
       }
 
+      // Push matching references
+      local(scope, variable);
+
+      // Recurse
+      global(scope.childScopes, variable);
+    });
+  }
+
+  // Push local matching references
+  if (variable.references.length === 0) {
+    local(variable.scope, variable);
+  }
+
+  // Start scope lookup recursion
+  global(variable.scope.childScopes, variable);
+
+  return variable;
+}
+
+function parse(code, callback) {
+  var ast = esprima.parse(String(code));
+
+  // Verify the absence of With or Eval
+  if (esquery.query(ast, ':matches(WithStatement, Identifier[name = "eval"])').length > 0)
+    throw 'Compilation impossible because of the presence of With or eval'
+
+  // Build the parenting backlink needed for the next steps in the compilation.
+  estraverse.traverse(ast, {
+    enter: function(n, p) {
       n.parent = p;
     }
   })
 
-  return ast;
+  // Populate scopes and link the scopes with the AST
+  escope.analyze(ast).scopes.forEach(function(scope) {
+    scope.block.scope = scope;
+    scope.variables.forEach(function(variable) {
+      populate(variable);
+    })
+  })
+
+  return callback(null, ast);
 }
+
+module.exports = parse;

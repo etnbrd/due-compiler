@@ -1,66 +1,63 @@
-var spotlight = require('./spotlight'),
-    printer = require('./printer'),
-    parser = require('./parser'),
-    esprima = require('esprima'),
-    esquery = require('esquery');
-
-
-
-function then(fn) {
-
-  var code = [
-    'fn()',
-    '.then(callback)'
-  ].join('\n');
-
-  var ast = esprima.parse(code);
-  var cll = ast.body[0].expression;
-  var clb = fn.arguments[fn.arguments.length-1];
-
-  fn.arguments = fn.arguments.filter(function(arg) {
-    return arg !== clb
-  })
-
-  cll.callee.object = fn;
-  cll.arguments[0] = clb;
-
-  return cll;
-}
-
-
-
+var due = require('due'),
+    parser = due.mock(require('./parser')),
+    spotlight = due.mock(require('./spotlight')),
+    treeBuilder = due.mock(require('./tree')),
+    chainBuilder = due.mock(require('./chain')),
+    findIdentifiers = require('./findIdentifiers'),
+    declarationRelocator = require('./relocator'),
+    flattenDescendance = require('./flatten'),
+    printer = due.mock(require('./printer'));
 
 module.exports = function(code, callback) {
 
-  var ast = parser(String(code));
+  var ast;
 
-  results = esquery.query(ast, 'CallExpression > FunctionExpression');
-  spotlight(results, function(err, res) {
-    console.log(res.length + ' rupture points found');
+  parser(String(code))
+  .then(function(err, _ast) {
+    if (err) throw err;
+    ast = _ast;
+    return spotlight(ast);
+  })
+  .then(meet(treeBuilder))
+  .then(meet(chainBuilder))
+  .then(function(err, chains) {
+    chains.forEach(function(chain) {
+
+      // Find the identifiers
+      var identifiers = findIdentifiers(chain);
+
+      // Find the BlockStatement of the upper scope
+      var block = returnBlockStatement(chain.rp.callback.scope.upper.block);
+
+      declarationRelocator(block, identifiers);
+
+    });
+
+    chains.forEach(flattenDescendance);
 
 
+    return printer(ast);
+  })
+  .then(callback);
+}
+
+function meet(fn) {
+  return function(err, res) {
+    if (err) throw err;
+    else return fn(res);
+  }
+}
 
 
-    res.forEach(function(call) {
+// TODO move this out of the way, it clutters my source.
 
-      stuff = then(call)
+function returnBlockStatement(block) {
+  if (block.type === 'Program')
+    return block
 
-      // console.log(stuff)
+  if (block.type === 'FunctionExpression'
+  ||  block.type === 'FunctionDeclaration')
+    return block.body
 
-      // console.log(require('escodegen').generate(stuff));
-
-
-      call.parent.expression = stuff;
-
-      // console.log(call.parent)
-
-
-
-    })
-
-    var code = printer(ast);
-
-    callback(null, code);
-
-  });
+  // TODO what about the try / catch stuffs : they declare a new scope
 }

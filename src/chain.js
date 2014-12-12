@@ -1,9 +1,19 @@
 function chainBuilder(trees, callback) {
-
+  /*
+   *  We walk each tree to find node with more than one child.
+   *  If there is more than one child, we try to find a legitimate child to continue the chain.
+   *  A legitimate child is a child with at least one child.
+   *  If there is more than one legitimate child, then there is none.
+   *  The non legitimate child - the bastards - are considered as new chain that wa walk the same way than a tree.
+   */
 
   function breakChildren(node) {
 
     function findLegitimates(children, child) {
+      /*
+       *  A legitimate child have at least one child itself.
+       *  A non legitimate child doesn't have any children.
+       */
       if (child.children.length > 0)
         children.push(child);
       return children;

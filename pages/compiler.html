@@ -140,9 +140,25 @@ function displayError(err) {
 }
 
 
+function test() {
+  console.log('test');
+  console.log(' ------ ');
+
+  editor.getSession().setAnnotations([{
+    row: 0,
+    column: 1,
+    text: "Strange error",
+    type: "information" // also warning and information
+  }]);
+
+  console.log(editor.getSession())
+
+  console.log(' ------ ');
+}
 
 
-compile.click(compileSource)
+compile.click(test)
+// compile.click(compileSource)
 
 // var code = source.toString();
 

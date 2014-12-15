@@ -43,7 +43,10 @@ function forEach(list, callback, end) {
     }
   }
   
-  next(list[0], 0);
+  if (list.length === 0)
+    return end();
+
+  return next(list[0], 0);
 }
 
 function makeRupturePoint(node) {
@@ -57,10 +60,12 @@ module.exports = function(ast, callback) {
 
   var potentialRP = findPotentialRP(ast); 
 
-  var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
+  // TODO externalize interface
+
+  // var rl = readline.createInterface({
+  //   input: process.stdin,
+  //   output: process.stdout
+  // });
 
   var actualRP = [];
 
@@ -73,18 +78,18 @@ module.exports = function(ast, callback) {
         actualRP.push(makeRupturePoint(item.parent));
       }    
       return next()
-    } else 
-      rl.question('Is the call ' + escodegen.generate(item.parent.callee) + '  asynchronous ? [y/n]', function(answer) {
+    } //else 
+      // rl.question('Is the call ' + escodegen.generate(item.parent.callee) + '  asynchronous ? [y/n]', function(answer) {
 
-        if (answer === 'y') {
-          actualRP.push(makeRupturePoint(item.parent));
-        }
+      //   if (answer === 'y') {
+      //     actualRP.push(makeRupturePoint(item.parent));
+      //   }
 
-        next();
-      });
+      //   next();
+      // });
   }, function() {
 
     callback(null, actualRP)
-    rl.close();
+    // rl.close();
   })
 }

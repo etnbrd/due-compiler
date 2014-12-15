@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>due</title>
+    <meta content="True American is an elaborate drinking game, invented by four respectable personages : Nick, Winston, Schmidt and Coach." name="description">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <style>
+
+      @font-face {
+          font-family: 'Roboto';
+          src: url('Roboto-Black.ttf') format('truetype');
+          font-weight: 900;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Roboto';
+          src: url('Roboto-Thin.ttf') format('truetype');
+          font-weight: 100;
+          font-style: normal;
+      }
+
+      * {
+        padding: 0;
+        margin: 0;
+        font-family: "Roboto";
+      }
+
+      html {
+        width: 100%;
+        height: 100%;
+      }
+
+      body {
+        width: 700px;
+        max-width: 80%;
+        margin: auto;
+      }
+
+      h1, h2 {
+        font-weight: 900;
+      }
+
+      h1 {
+        background: yellow;
+        padding: 100px 0 0 0;
+        font-size: 4em;
+      }
+    </style>
+</head>
+
+<body>
+  <h1>due</h1>
+  <h2>Due makes your callback behave well.</h2>
+
+  If you use to write asynchronous Node.js code, you might have encounter the <a href="">Callback hell</a> aka Pyramid of Doom.
+  To avoid this pattern, it is common to wrap callback into Promises, or one of the equivalent (Q, Async, Vow ...).
+  A promise is simply a different pattern allowing to write asynchronous sequence as a cascade of call, instead of a pyramide of call.
+  Promises are coming in ECMAScript 6. so it is time to switch, and start writing better code.
+
+  Due is very similar to promises, except for two things.
+  <ul>
+    <li>The interface is slightly differnt. It doesn't expect two callbacks - one for success, one for rejection - like promises do, but only one. Exactly like th callback you are used to in node.js</li>
+    <li>A due doesn't provide the two methods all and race that promises provide. That means you need to synchronize your execution the same way you were used to in node.js, using variables and conditinos. For the more nerdy of you, that makes due sound regardless to promises, but not complete.</li>
+  </ul>
+
+  However, you might already have tons of lines with callbacks. and you don't want to refactor everything.
+  Here we provide to you a due compiler
+
+  <a href="compiler.html">online compiler</a>
+</body>
+</html>

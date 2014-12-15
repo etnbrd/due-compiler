@@ -8,7 +8,7 @@ var due = require('due'),
     flattenDescendance = require('./flatten'),
     printer = due.mock(require('./printer'));
 
-module.exports = function(code, callback) {
+module.exports = function compiler(code, callback) {
 
   var ast;
 

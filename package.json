@@ -1,15 +1,16 @@
 {
-  "name": "vow-compiler",
+  "name": "due-compiler",
   "version": "0.0.1",
-  "description": "A compiler to transform pyramid of callback into sequence of Vows",
+  "description": "A compiler to transform pyramid of callback into sequence of Dues",
   "main": "src/index.js",
-  "bin": "bin/flx-compiler.js",
+  "bin": "bin/compiler.js",
   "scripts": {
     "test": "mocha test"
   },
   "author": "Etienne Brodu <etn@etnbrd.com> (http://etnbrd.com/)",
   "license": "ISC",
   "devDependencies": {
+    "browserify": "^7.0.1",
     "due": "0.0.7",
     "mocha": "^2.0.1"
   },

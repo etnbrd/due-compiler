@@ -21,5 +21,9 @@
     "esquery": "^0.3.0",
     "estraverse": "^1.8.0",
     "js-beautify": "^1.5.4"
+  },
+  "scripts": {
+    "client": "browserify pages/scripts/client.js > pages/scripts/script.js",
+    "pages": "git subtree push --prefix pages github gh-pages"
   }
 }

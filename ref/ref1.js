@@ -11,15 +11,15 @@ fs.readdir(source, function(err, files) {
   files.forEach(function(filename, fileIndex) {
 
     fs.stat(source + '/' + filename, function(err, stat) {
-      if (err) throw 'Error looking for file: ' + err
+      if (err) throw 'Error looking for file: ' + err;
 
-      var control = 0
+      var control = 0;
 
       if (stat.isFile())
         fs.readFile(source + '/' + filename, function(err, file) {
           if (err) throw 'Error opening file: ' + err;
           
-          control++ // use control
+          control++; // use control
 
           var lines = String(file).split('\n'),
               number = lines.reduce(function(n, line) {
@@ -32,9 +32,9 @@ fs.readdir(source, function(err, files) {
           pending--;
           if (pending === 0)
             console.log('TOTAL : \t\t', total);
-        })
+        });
       else
         pending--;
-    })
-  })
-})
+    });
+  });
+});

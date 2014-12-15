@@ -1,0 +1,1 @@
+window.compiler = require('../../src');

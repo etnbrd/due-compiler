@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>due</title>
+    <meta content="True American is an elaborate drinking game, invented by four respectable personages : Nick, Winston, Schmidt and Coach." name="description">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <style>
+
+/*      @font-face {
+          font-family: 'Roboto';
+          src: url('Roboto-Black.ttf') format('truetype');
+          font-weight: 900;
+          font-style: normal;
+      }
+
+      @font-face {
+          font-family: 'Roboto';
+          src: url('Roboto-Thin.ttf') format('truetype');
+          font-weight: 100;
+          font-style: normal;
+      }*/
+
+      * {
+        padding: 0;
+        margin: 0;
+        font-family: "Roboto";
+        font-weight: 100;
+      }
+
+      html {
+        width: 100%;
+        height: 100%;
+      }
+
+      body {
+        width: 700px;
+        max-width: 80%;
+        margin: auto;
+      }
+
+      h1, h2 {
+        font-weight: 900;
+      }
+
+      h1 {
+        background: yellow;
+        padding: 100px 0 0 0;
+        font-size: 4em;
+      }
+
+      #source {
+        font-family: 'inconsolata';
+        display: block;
+        width: 100%;
+        border: none;
+      }
+    </style>
+</head>
+
+<body>
+
+<header>
+  <a href="index.html">due</a>
+</header>
+
+<textarea id="source" placeholder='paste a github url, or your code here.'>
+</textarea>
+<button id='compile'>compile</button>
+
+
+
+<script src="scripts/script.js"></script>
+<script src="scripts/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+var compiler = window.compiler;
+
+var source = $('#source')[0],
+    compile = $('#compile');
+
+function compileSource(e) {
+  try {
+    compiler(source.value, function(err, res) {
+      source.value = res;
+    })
+  } catch (e) {
+    displayError(e);
+  }
+}
+
+
+function displayError(err) {
+  console.error(err);
+}
+
+
+
+
+compile.click(compileSource)
+
+// var code = source.toString();
+
+// compiler(code, function(err, res) {
+//     console.log(err, res);
+// })
+
+  
+// console.log(window.__compiler);
+
+</script>
+
+</body>
+</html>

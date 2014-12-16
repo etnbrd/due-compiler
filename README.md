@@ -1,4 +1,4 @@
-# Due compiler
+# Due
 
 ## What is a due ?
 
@@ -10,12 +10,40 @@ Instead, it follows the *error-first* convention from Node.js.
 
 This compiler translate a javascript code using callbacks, into a javascript code using Dues.
 
+```
+// parent
+_1(input_1, function(err, res) { // 1
+  _2(input_2, function(err, res) { // 2 
+    _3(input_3, function(err, res) { // 3
+
+    });
+  });
+});
+```
+into 
+
+```
+// parent
+_1(input_1)
+.then( funciton(err, res) { // 1
+  return _2(input_2)
+})
+.then( funciton(err, res) { // 2
+  return _3(input_3)
+})
+.then( funciton(err, res) { // 3
+  
+})
+```
+
 + It doesn't replace the libraries, you have to replace the vanilla libraries with due-compatible libraries.
   You can use the `mock` method to make an asynchronous call due-compatible.
 
 + It doesn't spot asynchronous functions, you have to provide a method to filter asynchronous from synchronous functions.
   The console client, and the web client provide an interactive interface to do that.
   You can automate this process with your own method.
+
+# Usage
 
 ## Console client
 
@@ -28,7 +56,7 @@ This compiler translate a javascript code using callbacks, into a javascript cod
 The compiler is available online, as a [standalone webpage](http://etnbrd.github.io/due-compiler/compiler).
 
 
-## node.js API
+## Node.js API
 
 It is possible to use the compiler as a node.js library.
 
@@ -54,82 +82,38 @@ function filterRP(err, potentialRP, callback) {
 }
 ```
 
-## 
+## Browser API
 
-We need to make the hierarchical tree of application parts.
-The goal is to be able to find cascading application parts.
-A cascading of application part, is an application part that contain another application part.
-This second application part could be appent to the first application part.
+It is possible to use the compiler in the browser, using Browserify.
+The API is the same as for node.js.
 
-// parent
-1 {
-  2 { // 2 
-    3 { // 3
+The following command create a bundle to include in your webpage.
 
-    }
-  }
-}
+```
+browserify pages/scripts/client.js > pages/scripts/script.js
+```
 
-into 
+```
+<script src="scripts/script.js"></script>
+<script type="text/javascript">
+  var compiler = window.compiler;
+</script>
+```
 
-// parent
-1.then { // 1
-  2
-}
-.then { // 2
-  3
-}
-.then { // 3
-  
-}
+---
 
-
-What are the rules that allow or prevent the composition of due.
-- 2 needs to returns the due.
-  -> 3 needs to be direct child of 2 
-- identifiers shared between 2 and 3 needs to be moved to the parent
-  -> remove the declarations from 2 and 3
-  -> declare the variables into parent.
-
-
-# A chain is :
-- a root :
-  - a variable declarator
-  - a root rupture point
-- one or more links :
-  - an application part, direct child of the previous application part
-
-# Direct child means :
-The chain between the root and a rupture point needs to be consisting solely of rupture points
-(CallExpression > FunctionExression > Body > CallExpression > FunctionExpression > ...)
-
-If a parent has more than one child : break the chain.
-(Or, if only one child got children, then continue the chain for this child)
-
-**.ChainBuilder**
-It builds the chain of application parts.
-
-**.ControlFlowPredictor**
-The CallExpressions needs to return the due.
-So it needs to happen, and there needs to be no other return value (shounldn't though).
-The ControlFlowPredictor analyses the control flow and say if the asynchronous call is eventually going to happen, or if it is uncertain due to some control flow.
-If there is any kind of control flow BEFORE the rupture point -> break the chain.
-For example, if the return happen before the asynchronous call.
-
-
-Remove the declaration of shared identifiers from the child, and move them into the parent.
-
-
+# Internals
 
 ## Compilation steps
 
-1 - build the trees of direct child application parts
-    A node can have many children.
+1 - build the trees of direct child asynchronous calls
+    An asynchronous calls callback can call many asynchronous calls.
 
 2 - Build the chains from the tree
-    If a node has many children, if only one has children, continue the chain with him.
-    The other ones are turned into small chains.
+    If a callback call many asynchronous calls, the chain can continue with no more than one of them.
+    The other ones are turned into different chains.
 
 3 - Inside a chain, find and list the shared identifiers.
+    these identifiers need to be moved to a parent scope.
 
 4 - Modify the code accordingly to these modifications

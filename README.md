@@ -1,5 +1,7 @@
 # Due
 
+[![NPM](https://nodei.co/npm/due-compiler.png?compact=true)](https://www.npmjs.com/package/due-compiler)
+
 ## What is a due ?
 
 A [due](https://github.com/etnbrd/due) is a simpler alternative to Promises in Javascript.
@@ -37,7 +39,7 @@ _1(input_1)
 ```
 
 + It doesn't replace the libraries, you have to replace the vanilla libraries with due-compatible libraries.
-  You can use the `mock` method to make an asynchronous call due-compatible.
+  You can use the `mock` method from the [npm due package](), to make an asynchronous call due-compatible.
 
 + It doesn't spot asynchronous functions, you have to provide a method to filter asynchronous from synchronous functions.
   The console client, and the web client provide an interactive interface to do that.

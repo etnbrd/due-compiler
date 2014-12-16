@@ -1,4 +1,4 @@
-# Due
+# Due compiler
 
 [![NPM](https://nodei.co/npm/due-compiler.png?compact=true)](https://www.npmjs.com/package/due-compiler)
 

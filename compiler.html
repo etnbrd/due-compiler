@@ -89,6 +89,11 @@
         padding: 10px;
       }
 
+      .due-rupturePoint {
+        position: absolute;
+        background: rgba(0, 0, 0, 1);
+      }
+
     </style>
 </head>
 
@@ -101,7 +106,46 @@
 
 
 <div id="source">
-paste your code here.
+var fs = require('fs');
+
+var source = __dirname;
+
+fs.readdir(source, function(err, files) {
+  if (err) throw 'Error finding files: ' + err;
+
+  var total = 0,
+      pending = files.length;
+
+  files.forEach(function(filename, fileIndex) {
+
+    fs.stat(source + '/' + filename, function(err, stat) {
+      if (err) throw 'Error looking for file: ' + err;
+
+      var control = 0;
+
+      if (stat.isFile())
+        fs.readFile(source + '/' + filename, function(err, file) {
+          if (err) throw 'Error opening file: ' + err;
+          
+          control++; // use control
+
+          var lines = String(file).split('\n'),
+              number = lines.reduce(function(n, line) {
+                return n + (line.length > 0 ? 1 : 0);
+              }, 0);
+
+          console.log(filename, ' : \t\t', number);
+
+          total += number;
+          pending--;
+          if (pending === 0)
+            console.log('TOTAL : \t\t', total);
+        });
+      else
+        pending--;
+    });
+  });
+});
 </div>
 
 <script src="scripts/script.js"></script>
@@ -144,21 +188,39 @@ function test() {
   console.log('test');
   console.log(' ------ ');
 
-  editor.getSession().setAnnotations([{
-    row: 0,
-    column: 1,
-    text: "Strange error",
-    type: "information" // also warning and information
-  }]);
+  // editor.getSession().setAnnotations([{
+  //   row: 0,
+  //   column: 1,
+  //   text: "Strange error",
+  //   type: "information" // also warning and information
+  // }]);
 
-  console.log(editor.getSession())
+
+  // editor.getSession().setAnnotations([{
+  //                 row: editorcursor.row,
+  //                 column: editorcursor.column,
+  //                 text: "Strange error",
+  //                 type: "info"
+  //               }]);
+
+  // var markerId = editor.getSession().renderer.addMarker(new Range(1, 10, 1, 15), "warning", "text");
+
+  var session = editor.getSession();
+
+  // console.log(session);
+
+  var Range = ace.require('ace/range').Range
+
+  session.addMarker(
+      new Range(1, 5, 3, 2), "due-rupturePoint", undefined, false
+   );
 
   console.log(' ------ ');
 }
 
 
-compile.click(test)
-// compile.click(compileSource)
+// compile.click(test)
+compile.click(compileSource)
 
 // var code = source.toString();
 

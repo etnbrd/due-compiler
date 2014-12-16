@@ -44,7 +44,10 @@ function populate(variable) {
 }
 
 function parse(code, callback) {
-  var ast = esprima.parse(String(code));
+  var ast = esprima.parse(String(code), {
+    // Parser Options
+    loc: true
+  });
 
   // Verify the absence of With or Eval
   if (esquery.query(ast, ':matches(WithStatement, Identifier[name = "eval"])').length > 0)

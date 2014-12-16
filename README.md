@@ -1,3 +1,61 @@
+# Due compiler
+
+## What is a due ?
+
+A [due](https://github.com/etnbrd/due) is a simpler alternative to Promises in Javascript.
+It doesn't follow the Promise/A+ specification.
+Instead, it follows the *error-first* convention from Node.js.
+
+## Compiler
+
+This compiler translate a javascript code using callbacks, into a javascript code using Dues.
+
++ It doesn't replace the libraries, you have to replace the vanilla libraries with due-compatible libraries.
+  You can use the `mock` method to make an asynchronous call due-compatible.
+
++ It doesn't spot asynchronous functions, you have to provide a method to filter asynchronous from synchronous functions.
+  The console client, and the web client provide an interactive interface to do that.
+  You can automate this process with your own method.
+
+## Console client
+
+```
+./bin/compiler <source> [<target>]
+```
+
+## Web client
+
+The compiler is available online, as a [standalone webpage](http://etnbrd.github.io/due-compiler/compiler).
+
+
+## node.js API
+
+It is possible to use the compiler as a node.js library.
+
+```
+var due_compiler = require('due-compiler');
+
+due_compiler(code, filterRP, callback);
+
+```
+
+`filterRP` must be a function to filter synchronous from asynchronous function calls.
+The asynchronous function calls are called rupture points, because they allow the transformation.
+
+```
+function filterRP(err, potentialRP, callback) {
+
+  var actualRP = potentialRP.filter(function(rp) {
+    // ... return rp.isAsynchronous
+  })
+
+  callback(null, actualRP);
+
+}
+```
+
+## 
+
 We need to make the hierarchical tree of application parts.
 The goal is to be able to find cascading application parts.
 A cascading of application part, is an application part that contain another application part.
@@ -63,7 +121,7 @@ Remove the declaration of shared identifiers from the child, and move them into 
 
 
 
-
+## Compilation steps
 
 1 - build the trees of direct child application parts
     A node can have many children.

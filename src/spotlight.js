@@ -1,18 +1,5 @@
-var readline = require('readline'),
-    escodegen = require('escodegen'),
+var escodegen = require('escodegen'),
     esquery = require('esquery');
-
-
-
-
-shortcuts = {
-  'fs.readdir': true,
-  'fs.stat': true,
-  'fs.readFile': true,
-  'files.forEach': false,
-  'lines.reduce': false
-}
-
 
 function findPotentialRP(ast) {
   var rps = esquery.query(ast, 'CallExpression > FunctionExpression');
@@ -27,28 +14,6 @@ function findPotentialRP(ast) {
   return rps
 }
 
-
-function forEach(list, callback, end) {
-
-  function next(item, index) {
-    callback(item, _next(list, index));
-  }
-
-  function _next(list, index) {
-    return function () {
-      if (++index < list.length)
-        next(list[index], index);
-      else
-        end()
-    }
-  }
-  
-  if (list.length === 0)
-    return end();
-
-  return next(list[0], 0);
-}
-
 function makeRupturePoint(node) {
   node.isRupturePoint = true;
   node.children = [];
@@ -56,7 +21,7 @@ function makeRupturePoint(node) {
   return node;
 }
 
-module.exports = function(ast, callback) {
+module.exports = function(ast, filterRP, callback) {
 
   var potentialRP = findPotentialRP(ast); 
 
@@ -67,29 +32,36 @@ module.exports = function(ast, callback) {
   //   output: process.stdout
   // });
 
-  var actualRP = [];
+  filterRP(null, potentialRP, function(err, actualRP) {
 
-  forEach(potentialRP, function(item, next) {
+    actualRP.forEach(makeRupturePoint);
 
-    var callee = shortcuts[escodegen.generate(item.parent.callee)];
-
-    if (callee !== undefined) { 
-      if (callee) {
-        actualRP.push(makeRupturePoint(item.parent));
-      }    
-      return next()
-    } //else 
-      // rl.question('Is the call ' + escodegen.generate(item.parent.callee) + '  asynchronous ? [y/n]', function(answer) {
-
-      //   if (answer === 'y') {
-      //     actualRP.push(makeRupturePoint(item.parent));
-      //   }
-
-      //   next();
-      // });
-  }, function() {
-
-    callback(null, actualRP)
-    // rl.close();
+    callback(err, actualRP);
   })
+
+  // var actualRP = [];
+
+  // forEach(potentialRP, function(item, next) {
+
+  //   var callee = shortcuts[escodegen.generate(item.parent.callee)];
+
+  //   if (callee !== undefined) { 
+  //     if (callee) {
+  //       actualRP.push(makeRupturePoint(item.parent));
+  //     }    
+  //     return next()
+  //   } //else 
+  //     // rl.question('Is the call ' + escodegen.generate(item.parent.callee) + '  asynchronous ? [y/n]', function(answer) {
+
+  //     //   if (answer === 'y') {
+  //     //     actualRP.push(makeRupturePoint(item.parent));
+  //     //   }
+
+  //     //   next();
+  //     // });
+  // }, function() {
+
+  //   callback(null, actualRP)
+  //   // rl.close();
+  // })
 }

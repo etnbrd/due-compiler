@@ -8,7 +8,7 @@ var due = require('due'),
     flattenDescendance = require('./flatten'),
     printer = due.mock(require('./printer'));
 
-module.exports = function compiler(code, callback) {
+module.exports = function compiler(code, filterRP, callback) {
 
   var ast;
 
@@ -16,7 +16,7 @@ module.exports = function compiler(code, callback) {
   .then(function(err, _ast) {
     if (err) throw err;
     ast = _ast;
-    return spotlight(ast);
+    return spotlight(ast, filterRP);
   })
   .then(meet(treeBuilder))
   .then(meet(chainBuilder))

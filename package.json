@@ -1,6 +1,6 @@
 {
   "name": "due-compiler",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A compiler to transform pyramid of callback into sequence of Dues",
   "main": "src/index.js",
   "bin": "bin/compiler.js",

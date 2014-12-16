@@ -51,6 +51,8 @@ _1(input_1)
 ./bin/compiler <source> [<target>]
 ```
 
+If `target` is not specified, the compiler write to a file named `<source path and base name>-due.js`.
+
 ## Web client
 
 The compiler is available online, as a [standalone webpage](http://etnbrd.github.io/due-compiler/compiler).

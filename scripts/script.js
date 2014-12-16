@@ -1,4 +1,320 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (process){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var splitPath = function(filename) {
+  return splitPathRe.exec(filename).slice(1);
+};
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function(path) {
+  var result = splitPath(path),
+      root = result[0],
+      dir = result[1];
+
+  if (!root && !dir) {
+    // No dirname whatsoever
+    return '.';
+  }
+
+  if (dir) {
+    // It has a dirname, strip trailing slash
+    dir = dir.substr(0, dir.length - 1);
+  }
+
+  return root + dir;
+};
+
+
+exports.basename = function(path, ext) {
+  var f = splitPath(path)[2];
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+
+exports.extname = function(path) {
+  return splitPath(path)[3];
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+}).call(this,require('_process'))
+},{"_process":2}],2:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canMutationObserver = typeof window !== 'undefined'
+    && window.MutationObserver;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    var queue = [];
+
+    if (canMutationObserver) {
+        var hiddenDiv = document.createElement("div");
+        var observer = new MutationObserver(function () {
+            var queueList = queue.slice();
+            queue.length = 0;
+            queueList.forEach(function (fn) {
+                fn();
+            });
+        });
+
+        observer.observe(hiddenDiv, { attributes: true });
+
+        return function nextTick(fn) {
+            if (!queue.length) {
+                hiddenDiv.setAttribute('yes', 'no');
+            }
+            queue.push(fn);
+        };
+    }
+
+    if (canPost) {
+        window.addEventListener('message', function (ev) {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],3:[function(require,module,exports){
 function Due(callback) {
 
   var self = this;
@@ -96,7 +412,7 @@ Due.mock = function(fn) {
 }
 
 module.exports = Due;
-},{}],2:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2014 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -2745,7 +3061,7 @@ module.exports = Due;
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./package.json":17,"estraverse":23,"esutils":6,"source-map":7}],3:[function(require,module,exports){
+},{"./package.json":19,"estraverse":25,"esutils":8,"source-map":9}],5:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -2891,7 +3207,7 @@ module.exports = Due;
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /*
   Copyright (C) 2013-2014 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2014 Ivan Nikulin <ifaaan@gmail.com>
@@ -2994,7 +3310,7 @@ module.exports = Due;
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -3133,7 +3449,7 @@ module.exports = Due;
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":4}],6:[function(require,module,exports){
+},{"./code":6}],8:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -3168,7 +3484,7 @@ module.exports = Due;
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./ast":3,"./code":4,"./keyword":5}],7:[function(require,module,exports){
+},{"./ast":5,"./code":6,"./keyword":7}],9:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -3178,7 +3494,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":12,"./source-map/source-map-generator":13,"./source-map/source-node":14}],8:[function(require,module,exports){
+},{"./source-map/source-map-consumer":14,"./source-map/source-map-generator":15,"./source-map/source-node":16}],10:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -3277,7 +3593,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":15,"amdefine":16}],9:[function(require,module,exports){
+},{"./util":17,"amdefine":18}],11:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -3421,7 +3737,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":10,"amdefine":16}],10:[function(require,module,exports){
+},{"./base64":12,"amdefine":18}],12:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -3465,7 +3781,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":16}],11:[function(require,module,exports){
+},{"amdefine":18}],13:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -3548,7 +3864,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":16}],12:[function(require,module,exports){
+},{"amdefine":18}],14:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -4033,7 +4349,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":8,"./base64-vlq":9,"./binary-search":11,"./util":15,"amdefine":16}],13:[function(require,module,exports){
+},{"./array-set":10,"./base64-vlq":11,"./binary-search":13,"./util":17,"amdefine":18}],15:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -4436,7 +4752,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":8,"./base64-vlq":9,"./util":15,"amdefine":16}],14:[function(require,module,exports){
+},{"./array-set":10,"./base64-vlq":11,"./util":17,"amdefine":18}],16:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -4846,7 +5162,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":13,"./util":15,"amdefine":16}],15:[function(require,module,exports){
+},{"./source-map-generator":15,"./util":17,"amdefine":18}],17:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -5167,7 +5483,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":16}],16:[function(require,module,exports){
+},{"amdefine":18}],18:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 0.1.0 Copyright (c) 2011, The Dojo Foundation All Rights Reserved.
@@ -5470,7 +5786,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"_process":40,"path":39}],17:[function(require,module,exports){
+},{"_process":2,"path":1}],19:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
@@ -5550,7 +5866,7 @@ module.exports={
   "_resolved": "https://registry.npmjs.org/escodegen/-/escodegen-1.4.1.tgz"
 }
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2013 Alex Seville <hi@alexanderseville.com>
@@ -6669,7 +6985,7 @@ module.exports={
 }, this));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"estraverse":23}],19:[function(require,module,exports){
+},{"estraverse":25}],21:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -10427,7 +10743,7 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /* vim: set sw=4 sts=4 : */
 (function () {
 
@@ -10714,7 +11030,7 @@ parseStatement: true, parseSourceElement: true */
 
 })();
 
-},{"./parser":22,"estraverse":21}],21:[function(require,module,exports){
+},{"./parser":24,"estraverse":23}],23:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -11400,7 +11716,7 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],22:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var result = (function(){
   /*
    * Generated by PEG.js 0.7.0.
@@ -13921,7 +14237,7 @@ var result = (function(){
 })();
 if (typeof define === "function" && define.amd) { define(function(){ return result; }); } else if (typeof module !== "undefined" && module.exports) { module.exports = result; } else { this.esquery = result; }
 
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -14761,7 +15077,7 @@ if (typeof define === "function" && define.amd) { define(function(){ return resu
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /**
 The following batches are equivalent:
 
@@ -14818,7 +15134,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 
-},{"./lib/beautify":27,"./lib/beautify-css":25,"./lib/beautify-html":26}],25:[function(require,module,exports){
+},{"./lib/beautify":29,"./lib/beautify-css":27,"./lib/beautify-html":28}],27:[function(require,module,exports){
 (function (global){
 /*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
 /*
@@ -15261,7 +15577,7 @@ if (typeof define === "function" && define.amd) {
 }());
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (global){
 /*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
 /*
@@ -16145,7 +16461,7 @@ if (typeof define === "function" && define.amd) {
 }());
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./beautify-css.js":25,"./beautify.js":27}],27:[function(require,module,exports){
+},{"./beautify-css.js":27,"./beautify.js":29}],29:[function(require,module,exports){
 (function (global){
 /*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
 /*
@@ -18074,9 +18390,9 @@ if (typeof define === "function" && define.amd) {
 }());
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 window.compiler = require('../../src');
-},{"../../src":32}],29:[function(require,module,exports){
+},{"../../src":34}],31:[function(require,module,exports){
 function chainBuilder(trees, callback) {
   /*
    *  We walk each tree to find node with more than one child.
@@ -18136,7 +18452,7 @@ function chainBuilder(trees, callback) {
 }
 
 module.exports = chainBuilder;
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 
 function findIdentifiers(node) {
   /*
@@ -18165,7 +18481,7 @@ function findIdentifiers(node) {
 
 
 module.exports = findIdentifiers;
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var esprima = require('esprima');
 
 function thenify(callExpression, callback) {
@@ -18244,7 +18560,7 @@ function flattenInterface(root) {
 }
 
 module.exports = flattenInterface;
-},{"esprima":19}],32:[function(require,module,exports){
+},{"esprima":21}],34:[function(require,module,exports){
 var due = require('due'),
     parser = due.mock(require('./parser')),
     spotlight = due.mock(require('./spotlight')),
@@ -18255,7 +18571,7 @@ var due = require('due'),
     flattenDescendance = require('./flatten'),
     printer = due.mock(require('./printer'));
 
-module.exports = function compiler(code, callback) {
+module.exports = function compiler(code, filterRP, callback) {
 
   var ast;
 
@@ -18263,7 +18579,7 @@ module.exports = function compiler(code, callback) {
   .then(function(err, _ast) {
     if (err) throw err;
     ast = _ast;
-    return spotlight(ast);
+    return spotlight(ast, filterRP);
   })
   .then(meet(treeBuilder))
   .then(meet(chainBuilder))
@@ -18308,7 +18624,7 @@ function returnBlockStatement(block) {
 
   // TODO what about the try / catch stuffs : they declare a new scope
 }
-},{"./chain":29,"./findIdentifiers":30,"./flatten":31,"./parser":33,"./printer":34,"./relocator":35,"./spotlight":36,"./tree":37,"due":1}],33:[function(require,module,exports){
+},{"./chain":31,"./findIdentifiers":32,"./flatten":33,"./parser":35,"./printer":36,"./relocator":37,"./spotlight":38,"./tree":39,"due":3}],35:[function(require,module,exports){
 var esprima = require('esprima'),
     escope = require('escope'),
     esquery = require('esquery'),
@@ -18355,7 +18671,10 @@ function populate(variable) {
 }
 
 function parse(code, callback) {
-  var ast = esprima.parse(String(code));
+  var ast = esprima.parse(String(code), {
+    // Parser Options
+    loc: true
+  });
 
   // Verify the absence of With or Eval
   if (esquery.query(ast, ':matches(WithStatement, Identifier[name = "eval"])').length > 0)
@@ -18380,14 +18699,14 @@ function parse(code, callback) {
 }
 
 module.exports = parse;
-},{"escope":18,"esprima":19,"esquery":20,"estraverse":23}],34:[function(require,module,exports){
+},{"escope":20,"esprima":21,"esquery":22,"estraverse":25}],36:[function(require,module,exports){
 var escodegen = require('escodegen'),
     beautify = require('js-beautify').js_beautify;
 
 module.exports = function(ast, callback) {
   callback(null, beautify(escodegen.generate(ast), { indent_size: 2 }));
 }
-},{"escodegen":2,"js-beautify":24}],35:[function(require,module,exports){
+},{"escodegen":4,"js-beautify":26}],37:[function(require,module,exports){
 function declarationRelocator(block, identifiers) {
 
   // THIS NEEDS HEAVY TESTING
@@ -18478,22 +18797,9 @@ function declarationRelocator(block, identifiers) {
 }
 
 module.exports = declarationRelocator;
-},{}],36:[function(require,module,exports){
-var readline = require('readline'),
-    escodegen = require('escodegen'),
+},{}],38:[function(require,module,exports){
+var escodegen = require('escodegen'),
     esquery = require('esquery');
-
-
-
-
-shortcuts = {
-  'fs.readdir': true,
-  'fs.stat': true,
-  'fs.readFile': true,
-  'files.forEach': false,
-  'lines.reduce': false
-}
-
 
 function findPotentialRP(ast) {
   var rps = esquery.query(ast, 'CallExpression > FunctionExpression');
@@ -18508,28 +18814,6 @@ function findPotentialRP(ast) {
   return rps
 }
 
-
-function forEach(list, callback, end) {
-
-  function next(item, index) {
-    callback(item, _next(list, index));
-  }
-
-  function _next(list, index) {
-    return function () {
-      if (++index < list.length)
-        next(list[index], index);
-      else
-        end()
-    }
-  }
-  
-  if (list.length === 0)
-    return end();
-
-  return next(list[0], 0);
-}
-
 function makeRupturePoint(node) {
   node.isRupturePoint = true;
   node.children = [];
@@ -18537,7 +18821,7 @@ function makeRupturePoint(node) {
   return node;
 }
 
-module.exports = function(ast, callback) {
+module.exports = function(ast, filterRP, callback) {
 
   var potentialRP = findPotentialRP(ast); 
 
@@ -18548,33 +18832,40 @@ module.exports = function(ast, callback) {
   //   output: process.stdout
   // });
 
-  var actualRP = [];
+  filterRP(null, potentialRP, function(err, actualRP) {
 
-  forEach(potentialRP, function(item, next) {
+    actualRP.forEach(makeRupturePoint);
 
-    var callee = shortcuts[escodegen.generate(item.parent.callee)];
-
-    if (callee !== undefined) { 
-      if (callee) {
-        actualRP.push(makeRupturePoint(item.parent));
-      }    
-      return next()
-    } //else 
-      // rl.question('Is the call ' + escodegen.generate(item.parent.callee) + '  asynchronous ? [y/n]', function(answer) {
-
-      //   if (answer === 'y') {
-      //     actualRP.push(makeRupturePoint(item.parent));
-      //   }
-
-      //   next();
-      // });
-  }, function() {
-
-    callback(null, actualRP)
-    // rl.close();
+    callback(err, actualRP);
   })
+
+  // var actualRP = [];
+
+  // forEach(potentialRP, function(item, next) {
+
+  //   var callee = shortcuts[escodegen.generate(item.parent.callee)];
+
+  //   if (callee !== undefined) { 
+  //     if (callee) {
+  //       actualRP.push(makeRupturePoint(item.parent));
+  //     }    
+  //     return next()
+  //   } //else 
+  //     // rl.question('Is the call ' + escodegen.generate(item.parent.callee) + '  asynchronous ? [y/n]', function(answer) {
+
+  //     //   if (answer === 'y') {
+  //     //     actualRP.push(makeRupturePoint(item.parent));
+  //     //   }
+
+  //     //   next();
+  //     // });
+  // }, function() {
+
+  //   callback(null, actualRP)
+  //   // rl.close();
+  // })
 }
-},{"escodegen":2,"esquery":20,"readline":38}],37:[function(require,module,exports){
+},{"escodegen":4,"esquery":22}],39:[function(require,module,exports){
 function treesBuilder(rps, callback) {
   /*
    *  For each rupture point, it finds the parent and links to it.
@@ -18622,322 +18913,4 @@ function treesBuilder(rps, callback) {
 }
 
 module.exports = treesBuilder;
-},{}],38:[function(require,module,exports){
-
-},{}],39:[function(require,module,exports){
-(function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length - 1; i >= 0; i--) {
-    var last = parts[i];
-    if (last === '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
-
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
-}
-
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
-};
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-  var resolvedPath = '',
-      resolvedAbsolute = false;
-
-  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-    var path = (i >= 0) ? arguments[i] : process.cwd();
-
-    // Skip empty and invalid entries
-    if (typeof path !== 'string') {
-      throw new TypeError('Arguments to path.resolve must be strings');
-    } else if (!path) {
-      continue;
-    }
-
-    resolvedPath = path + '/' + resolvedPath;
-    resolvedAbsolute = path.charAt(0) === '/';
-  }
-
-  // At this point the path should be resolved to a full absolute path, but
-  // handle relative paths to be safe (might happen when process.cwd() fails)
-
-  // Normalize the path
-  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-  var isAbsolute = exports.isAbsolute(path),
-      trailingSlash = substr(path, -1) === '/';
-
-  // Normalize the path
-  path = normalizeArray(filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-
-  return (isAbsolute ? '/' : '') + path;
-};
-
-// posix version
-exports.isAbsolute = function(path) {
-  return path.charAt(0) === '/';
-};
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(filter(paths, function(p, index) {
-    if (typeof p !== 'string') {
-      throw new TypeError('Arguments to path.join must be strings');
-    }
-    return p;
-  }).join('/'));
-};
-
-
-// path.relative(from, to)
-// posix version
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
-
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
-    }
-
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
-    }
-
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
-
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-exports.sep = '/';
-exports.delimiter = ':';
-
-exports.dirname = function(path) {
-  var result = splitPath(path),
-      root = result[0],
-      dir = result[1];
-
-  if (!root && !dir) {
-    // No dirname whatsoever
-    return '.';
-  }
-
-  if (dir) {
-    // It has a dirname, strip trailing slash
-    dir = dir.substr(0, dir.length - 1);
-  }
-
-  return root + dir;
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPath(path)[2];
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPath(path)[3];
-};
-
-function filter (xs, f) {
-    if (xs.filter) return xs.filter(f);
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        if (f(xs[i], i, xs)) res.push(xs[i]);
-    }
-    return res;
-}
-
-// String.prototype.substr - negative index don't work in IE8
-var substr = 'ab'.substr(-1) === 'b'
-    ? function (str, start, len) { return str.substr(start, len) }
-    : function (str, start, len) {
-        if (start < 0) start = str.length + start;
-        return str.substr(start, len);
-    }
-;
-
-}).call(this,require('_process'))
-},{"_process":40}],40:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canMutationObserver = typeof window !== 'undefined'
-    && window.MutationObserver;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    var queue = [];
-
-    if (canMutationObserver) {
-        var hiddenDiv = document.createElement("div");
-        var observer = new MutationObserver(function () {
-            var queueList = queue.slice();
-            queue.length = 0;
-            queueList.forEach(function (fn) {
-                fn();
-            });
-        });
-
-        observer.observe(hiddenDiv, { attributes: true });
-
-        return function nextTick(fn) {
-            if (!queue.length) {
-                hiddenDiv.setAttribute('yes', 'no');
-            }
-            queue.push(fn);
-        };
-    }
-
-    if (canPost) {
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}]},{},[28]);
+},{}]},{},[30]);

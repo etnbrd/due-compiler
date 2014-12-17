@@ -1,11 +1,12 @@
 {
   "name": "due-compiler",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A compiler to transform pyramid of callback into sequence of Dues",
   "main": "src/index.js",
   "bin": "bin/compiler.js",
   "scripts": {
-    "test": "mocha test"
+    "client": "browserify pages/scripts/client.js > pages/scripts/script.js",
+    "pages": "git subtree push --prefix pages github gh-pages"
   },
   "author": "Etienne Brodu <etn@etnbrd.com> (http://etnbrd.com/)",
   "license": "ISC",
@@ -20,10 +21,7 @@
     "esprima": "^1.2.2",
     "esquery": "^0.3.0",
     "estraverse": "^1.8.0",
-    "js-beautify": "^1.5.4"
-  },
-  "scripts": {
-    "client": "browserify pages/scripts/client.js > pages/scripts/script.js",
-    "pages": "git subtree push --prefix pages github gh-pages"
+    "js-beautify": "^1.5.4",
+    "recast": "^0.9.11"
   }
 }

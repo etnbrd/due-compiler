@@ -55,8 +55,6 @@ function flattenDescendance(root, node) {
     //   due = node.child
     // }
 
-    console.log(node.rp.callback.body.body)
-
     node.rp.callback.body.body.push({
       type: 'ReturnStatement',
       argument: due

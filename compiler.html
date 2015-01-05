@@ -1,206 +1,23 @@
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
-    <meta charset="utf-8">
-    <title>due</title>
-    <meta content="True American is an elaborate drinking game, invented by four respectable personages : Nick, Winston, Schmidt and Coach." name="description">
-    <meta content="width=device-width,initial-scale=1" name="viewport">
-    <style>
-
-      @import url(http://fonts.googleapis.com/css?family=Roboto:100,900);
-      @import url(http://fonts.googleapis.com/css?family=Inconsolata:400,700);
-
-      * {
-        padding: 0;
-        margin: 0;
-        box-sizing: border-box;
-      }
-
-      html, body {
-        width: 100%;
-        height: 100%;
-
-        font-family: "Roboto";
-        font-size: 10pt;
-        font-weight: 100;
-      }
-
-      a, button {
-        display: inline-block;
-        
-        border: none;
-        border-radius: 2px;
-        padding: 10px 20px 12px 20px;
-        margin-bottom: 10px;
-
-        text-align: center;
-        font-size: 1em;
-        font-weight: 900;
-        color: black;
-
-        box-shadow: inset 0 -2px 0 0 rgba(50, 50, 50, 0.2);
-      }
-
-      a {
-        text-decoration: none;
-        background: rgb(230, 230, 230);
-      }
-
-      button {
-        background: rgb(255, 0, 73);
-      }
-
-
-
-      #source, #target, #errors {
-        position: absolute;
-        top: 60px;
-        /*bottom: 0;*/
-        right: 0;
-
-        width: 50%;
-
-        font-family: "Inconsolata";
-        font-size: 1em;
-      }
-
-      #source {
-        left: 0;
-        bottom: 0;
-      }
-
-      #target {
-        right: 0;
-        bottom: 0;
-      }
-
-      #errors {
-        right: 0;
-        padding: 20px;
-        z-index: 1000;
-        pointer-events: none;
-      }
-
-      .leftbar, #leftbar {
-        position: absolute;
-
-        height: 60px;
-        width: 100%;
-
-        top: 0;
-        left: 0;
-        right: 0;
-
-        background: rgb(232, 232, 232);
-
-        padding: 10px;
-      }
-
-      .ace_marker-layer .due-rupturePoint,
-      .ace_marker-layer .due-deferredCall {
-        position: absolute;
-      }
-
-      .due-rupturePoint,
-      .due-deferredCall {
-        border-radius: 2px;
-        pointer-events: auto;
-        opacity: 0.4;
-      }
-
-      .due-rupturePoint:hover,
-      .due-deferredCall:hover {
-        opacity: 0.7;
-      }
-
-      .due-rupturePoint {
-        box-shadow: 0 0 0 2px #D14;
-      }
-
-      .due-deferredCall {
-        box-shadow: 0 0 0 2px #0086B3;
-      }
-
-      .error {
-        background: rgb(120, 10, 15);
-        border-radius: 3px;
-
-        position: relative;
-
-        padding: 10px;
-        margin-bottom: 10px;
-
-        color: white;
-
-        pointer-events: auto;
-
-        opacity: 0.8;
-      }
-
-      .error > .close {
-        position: absolute;
-        top: 3px;
-        right: 3px;
-
-        padding: 0.5px 0 0 0.5px;
-
-        width: 14px;
-        height: 14px;
-
-        line-height: 14px;
-        text-align: center;
-
-        font-size: 8px;
-        background: white;
-        color: rgb(120, 10, 15);
-        font-weight: 900;
-
-        border-radius: 20px;
-
-        opacity: 0.6;
-
-        cursor: pointer;
-      }
-
-      .error > .close:hover {
-        opacity: 1;
-      }
-
-      #howto-popup {
-        display: none;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        right: 0;
-        /*bottom: 0;*/
-
-        background: rgb(250, 250, 250);
-        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
-
-        z-index: 1000;
-
-        padding: 20px 100px;
-      }
-
-      #howto-popup li{
-        margin-bottom: 10px;
-      }
-
-    </style>
+  <title>due compiler</title>
+  <meta charset="utf-8">
+  <meta content="True American is an elaborate drinking game, invented by four respectable personages : Nick, Winston, Schmidt and Coach." name="description">
+  <meta content="width=device-width,initial-scale=1" name="viewport">
+  <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
 </head>
 
-<body>
+  <body>
 
-<div id="leftbar" class="leftbar">
-  <a href="index.html">← due</a>
-  <a id='howto'>⚒ how-to</a>
-  <button id='compile'>⚒ compile</button>
-</div>
+    <div id="leftbar" class="leftbar">
+      <a href="index.html">← due</a>
+      <a id='howto'>⚒ how-to</a>
+      <button id='compile'>⚒ compile</button>
+    </div>
 
 
-<div id="source">
-var fs = require('fs');
-
+    <div id="source">var fs = require('fs');
 var source = __dirname;
 
 fs.readdir(source, function(err, files) {
@@ -239,217 +56,27 @@ fs.readdir(source, function(err, files) {
     });
   });
 });
-</div>
+    </div>
 
-<div id="target">
-</div>
+    <div id="target">
+    </div>
 
-<div id="errors">
-</div>
+    <div id="errors">
+    </div>
 
-<div id="howto-popup">
-<ol>
-  <li>Paste your code</li>
-  <li>Mark the <span class="due-rupturePoint">asynchronous calls</span> by clicking the <span class="due-deferredCall">callback calls</span> </li>
-  <li>Compile</li>
-</ol>
-</div>
+    <div id="howto-popup">
+    <ol>
+      <li>Paste your code</li>
+      <li>Mark the <span class="due-rupturePoint">asynchronous calls</span> by clicking the <span class="due-deferredCall">callback calls</span> </li>
+      <li>Compile</li>
+    </ol>
+    </div>
 
-<script src="scripts/script.js"></script>
-<script src="scripts/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="scripts/jquery.min.js"></script>
+    <script src="scripts/compiler.bundle.js" type="text/javascript" charset="utf-8"></script>
+    <script src="scripts/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="scripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="scripts/md5.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="scripts/script.js" type="text/javascript" charset="utf-8"></script>
 
-<script type="text/javascript">
-
-var source = ace.edit("source");
-    source.setTheme("ace/theme/github");
-    source.getSession().setMode("ace/mode/javascript");
-    source.setHighlightActiveLine(false);
-
-var target = ace.edit("target");
-    target.setTheme("ace/theme/github");
-    target.getSession().setMode("ace/mode/javascript");
-    target.setHighlightActiveLine(false);
-
-var Range = ace.require('ace/range').Range
-var event = ace.require("ace/lib/event");
-
-var compiler = window.compiler;
-
-var errors = $('#errors');
-var compile = $('#compile');
-var howto = $('#howto');
-var howto_popup = $('#howto-popup');
-
-howto.click(function() {howto_popup.toggle()});
-
-
-function compileSource(e) {
-  try {
-    compiler(source.getValue(), filterRP, updateCode)
-  } catch (e) {
-    displayError(e);
-  }
-}
-
-function toRange(loc) {
-  return new Range(
-    loc.start.line - 1,
-    loc.start.column,
-    loc.end.line - 1,
-    loc.end.column
-  );
-}
-
-
-var callbacks = [];
-
-function filterRP(err, potentialRP, callback) {
-
-  var session = source.getSession();
-
-  callbacks = callbacks.filter(function(cb) {
-    session.removeMarker(cb.clickable);
-    delete(cb.clickable);  
-    return false;
-  })
-
-  callbacks = potentialRP;
-
-  potentialRP.forEach(function(prp) {
-    prp.clickable = session.addMarker(toRange(prp.parent.callee.loc), "due-deferredCall", undefined, false);
-  });
-
-
-  compile.click(function() {
-
-    var markers = source.getSession().getMarkers(false);
-
-    var rps = Object.keys(markers).map(function(k) { var mk = markers[k];
-
-      if (mk.clazz === 'due-rupturePoint') 
-        return callbacks.filter(function(cb) {
-          return cb.clickable == k;
-        })[0].parent;
-      else
-        return undefined
-    }).filter(function(n) {return n});
-
-    try {
-      callback(null, rps)
-    } catch (e) {
-      displayError(e);
-    }
-  })
-
-}
-
-
-source.on("click", function(e){
-    // console.log('HERE', e);
-    // console.log('>>> ', Math.floor(e.y / source.renderer.lineHeight));
-
-    var position = source.getCursorPosition();
-
-    var markers = source.getSession().getMarkers(false);
-
-    // console.log(position, markers);
-
-    // markers.forEach(function(mk) {
-    // })
-
-    for (var i in markers) { var mk = markers[i];
-
-      if (mk.clazz === 'due-deferredCall'
-      &&  mk.range.start.row === position.row
-      &&  mk.range.start.column <= position.column
-      &&  mk.range.end.column >= position.column) {
-        mk.clazz = 'due-rupturePoint'
-        source.session._emit('changeBackMarker');
-      }
-      else if (mk.clazz === 'due-rupturePoint'
-      &&  mk.range.start.row === position.row
-      &&  mk.range.start.column <= position.column
-      &&  mk.range.end.column >= position.column) {
-        mk.clazz = 'due-deferredCall'
-        source.session._emit('changeBackMarker');
-      }
-
-    }
-
-    return false
-})
-
-// $(source).on('click', '.due-clickable', function(evt) {
-//     // $(this) is the span element
-//     console.log('HERE');
-//     return true;
-// });
-
-function updateCode(err, code) {
-  if (err)
-    displayError(err)
-  else
-    target.setValue(code);
-}
-
-function displayError(err) {
-  console.error(err);
-
-  var error = $('<div class="error"><div class="close">✖</div><span class="message"></span></div>');
-
-  $(error).find('.message').text(err);
-  $(error).find('.close').click(function() {
-    error.remove();
-  })
-
-  errors.append(error);
-}
-
-function test() {
-  console.log('test');
-  console.log(' ------ ');
-
-  // editor.getSession().setAnnotations([{
-  //   row: 0,
-  //   column: 1,
-  //   text: "Strange error",
-  //   type: "information" // also warning and information
-  // }]);
-
-
-  // editor.getSession().setAnnotations([{
-  //                 row: editorcursor.row,
-  //                 column: editorcursor.column,
-  //                 text: "Strange error",
-  //                 type: "info"
-  //               }]);
-
-  // var markerId = editor.getSession().renderer.addMarker(new Range(1, 10, 1, 15), "warning", "text");
-
-  
-
-  // console.log(session);
-
-  console.log(' ------ ');
-}
-
-compileSource();
-source.getSession().on('change', compileSource);
-
-// compile.click(test)
-// compile.click(compileSource)
-
-// var code = source.toString();
-
-// compiler(code, function(err, res) {
-//     console.log(err, res);
-// })
-
-  
-// console.log(window.__compiler);
-
-</script>
-
-</body>
+  </body>
 </html>

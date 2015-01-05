@@ -1,0 +1,233 @@
+
+@import url(http://fonts.googleapis.com/css?family=Roboto:100,900);
+@import url(http://fonts.googleapis.com/css?family=Inconsolata:400,700);
+@import url(http://weloveiconfonts.com/api/?family=fontawesome);
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+
+  font-family: "Roboto";
+  font-size: 10pt;
+  font-weight: 100;
+}
+
+a, button {
+  display: inline-block;
+  
+  border: none;
+  border-radius: 2px;
+  padding: 10px 20px 12px 20px;
+  margin-bottom: 10px;
+
+  text-align: center;
+  font-size: 1em;
+  font-weight: 900;
+  color: black;
+
+  box-shadow: inset 0 -2px 0 0 rgba(50, 50, 50, 0.2);
+}
+
+a {
+  text-decoration: none;
+  background: rgb(230, 230, 230);
+}
+
+button {
+  background: rgb(255, 0, 73);
+}
+
+
+
+#source, #target, #errors {
+  position: absolute;
+  top: 60px;
+  /*bottom: 0;*/
+  right: 0;
+
+  width: 50%;
+
+  font-family: "Inconsolata";
+  font-size: 1em;
+}
+
+#source {
+  left: 0;
+  bottom: 0;
+}
+
+#target {
+  right: 0;
+  bottom: 0;
+}
+
+#errors {
+  right: 0;
+  padding: 20px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.leftbar, #leftbar {
+  position: absolute;
+
+  height: 60px;
+  width: 100%;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  background: rgb(232, 232, 232);
+
+  padding: 10px;
+}
+
+.ace_marker-layer .due-rupturePoint,
+.ace_marker-layer .due-deferredCall {
+  position: absolute;
+}
+
+.due-rupturePoint,
+.due-deferredCall {
+  border-radius: 2px;
+  pointer-events: auto;
+  /*opacity: 0.4;*/
+}
+
+.due-rupturePoint:hover,
+.due-deferredCall:hover {
+  /*opacity: 0.7;*/
+}
+
+.due-rupturePoint {
+  box-shadow: 0 0 0 2px #D14;
+}
+
+.due-deferredCall {
+  box-shadow: 0 0 0 2px #0086B3;
+}
+
+.due-popup {
+  display: none;
+
+  font-family: sans-serif;
+  font-size: 8pt;
+
+  background: rgba(255, 255, 255, 0.95);
+
+  width: auto;
+  height: auto;
+
+  position: relative;
+  top : 20px;
+
+  opacity: 1;
+
+  padding: 3px;
+
+  box-shadow: inherit;
+  border-radius: 3px;
+
+  z-index: 1000;
+}
+
+.due-popup span {
+  display: inline;
+}
+
+.due-popup .status {
+  font-weight: 900;
+}
+
+.due-popup .crowd::before {
+  font-family: "FontAwesome";
+  content: "   ";
+}
+
+.due-rupturePoint .due-popup .status,
+.due-popup .crowd.async::before {
+  color: #D14;
+}
+
+.due-deferredCall .due-popup .status,
+.due-popup .crowd.sync::before {
+  color: #0086B3;
+}
+
+.due-marker:hover .due-popup,
+.due-popup:hover {
+  display: inline-block;
+}
+
+
+.error {
+  background: rgb(120, 10, 15);
+  border-radius: 3px;
+
+  position: relative;
+
+  padding: 10px;
+  margin-bottom: 10px;
+
+  color: white;
+
+  pointer-events: auto;
+
+  opacity: 0.8;
+}
+
+.error > .close {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+
+  padding: 0.5px 0 0 0.5px;
+
+  width: 14px;
+  height: 14px;
+
+  line-height: 14px;
+  text-align: center;
+
+  font-size: 8px;
+  background: white;
+  color: rgb(120, 10, 15);
+  font-weight: 900;
+
+  border-radius: 20px;
+
+  opacity: 0.6;
+
+  cursor: pointer;
+}
+
+.error > .close:hover {
+  opacity: 1;
+}
+
+#howto-popup {
+  display: none;
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  /*bottom: 0;*/
+
+  background: rgb(250, 250, 250);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+
+  z-index: 1000;
+
+  padding: 20px 100px;
+}
+
+#howto-popup li{
+  margin-bottom: 10px;
+}

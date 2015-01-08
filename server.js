@@ -1,10 +1,13 @@
 #!/bin/env node
-var express = require('express'),
+var fs = require('fs'),
+    express = require('express'),
     bodyParser = require('body-parser'),
     colors = require('colors');
 
 var app = express(),
-    addr = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+    bkup = false,
+    bkupfile = '',
+    addr = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1',
     port = (process.env.OPENSHIFT_NODEJS_PORT || 8080).toString();
 
 
@@ -46,6 +49,30 @@ process.on('exit', function() { self.terminator(); });
     process.on(sig, function() { self.terminator(sig); });
 });
 
+//    BACK UP    //
+
+setInterval(function() {
+  if (bkup) return;
+
+  bkup = true;
+
+  var filename = 'backups/backup-' + Date.now() + '.json';
+  console.log(pre('§'), 'Save labels in ' + filename.bold);
+
+  fs.writeFile(filename, JSON.stringify(labels), function(err, result) {
+    if (err) console.error(pre('/!\\'.red), err)
+
+    if (bkupfile) fs.unlink(bkupfile, function(err) {
+      if (err) console.error(pre('/!\\'.red), err)
+    })
+
+    bkupfile = filename;
+    bkup = false;
+  })
+
+}, 6 * 3600000); // every 6 hour
+
+
 //    APP    //
 
 app.use(express.static('pages'));
@@ -61,7 +88,7 @@ app.get('/labels/:labels', function(req, res) {
 
   var wanted = req.param('labels').split(',');
 
-  console.log(pre('?'.yellow), wanted);
+  console.log(pre('<'.yellow), wanted);
   // build answer
   var reply = wanted.reduce(function(reply, label) {
     reply[label] = labels[label];
@@ -80,7 +107,7 @@ app.post('/labels/', function(req, res) {
 
     var body = JSON.parse(bodyStr);
 
-    console.log(pre('!'.red), body);
+    console.log(pre('>'.yellow), body);
 
     for(var label in body) {
       if (body[label].isRupturePoint)

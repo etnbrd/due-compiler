@@ -19,7 +19,7 @@ var compile = $('#compile');
 var howto = $('#howto');
 var howto_popup = $('#howto-popup');
 
-var URL = 'http://localhost:8080/labels/';
+var URL = 'labels/';
 
 howto.click(function() {howto_popup.toggle()});
 

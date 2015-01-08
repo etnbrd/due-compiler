@@ -1,1 +1,0 @@
-{"fs.readFile":{"sync":0,"async":1},"fs.readdir":{"sync":0,"async":1},"fs.stat":{"sync":0,"async":1},"files.forEach":{"sync":1,"async":0},"lines.reduce":{"sync":1,"async":0}}

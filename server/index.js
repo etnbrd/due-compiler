@@ -110,6 +110,12 @@ app.post('/labels/', function(req, res) {
     console.log(pre('>'.yellow), body);
 
     for(var label in body) {
+
+      labels[label] = {
+        sync: 0,
+        async: 0
+      }
+
       if (body[label].isRupturePoint)
         labels[label].async += 1;
       else

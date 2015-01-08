@@ -139,6 +139,8 @@ function compileSource(e) {
 
 function filterRP(err, potentialRP, callback) {
 
+  console.log(potentialRP);
+
   var session = source.getSession();
   var renderer = source.renderer;
   getLabels(potentialRP);
@@ -169,23 +171,26 @@ function filterRP(err, potentialRP, callback) {
         if (statusRP[label]) {
           var sync = statusRP[label].sync;
           var async = statusRP[label].async;
-
-          function toMarker(rp, label) {
-            return {
-              label : label,
-              rp : rp,
-              loc : rp.parent.callee.loc,
-              isRupturePoint : (async > sync),
-              crowdGuess : (async > sync),
-              count : sync + async,
-              accuracy : Math.max(async, sync) / (async + sync)
-            }
-          }
-
-          labels[label].forEach(function(rp) {
-            markers.push(toMarker(rp, label));
-          })
+        } else {
+          var sync = 0;
+          var async = 0;
         }
+
+        function toMarker(rp, label) {
+          return {
+            label : label,
+            rp : rp,
+            loc : rp.parent.callee.loc,
+            isRupturePoint : (async > sync),
+            crowdGuess : (async > sync),
+            count : sync + async,
+            accuracy : Math.max(async, sync) / (async + sync)
+          }
+        }
+
+        labels[label].forEach(function(rp) {
+          markers.push(toMarker(rp, label));
+        })
         return markers;
       }, [])
 

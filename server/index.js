@@ -48,7 +48,7 @@ process.on('exit', function() { self.terminator(); });
 
 //    APP    //
 
-app.use(express.static('pages'));
+app.use(express.static(__dirname + '/../pages'));
 app.use(bodyParser.json());
 
 app.get('/labels', function(req, res) {

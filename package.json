@@ -2,7 +2,7 @@
   "name": "due-compiler",
   "version": "0.0.5",
   "description": "A compiler to transform pyramid of callback into sequence of Dues",
-  "main": "src/index.js",
+  "main": "server/index.js",
   "bin": "bin/compiler.js",
   "scripts": {
     "compiler": "browserify pages/scripts/compiler.js > pages/scripts/compiler.bundle.js",

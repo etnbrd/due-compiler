@@ -5,7 +5,8 @@
   "main": "server/index.js",
   "bin": "bin/compiler.js",
   "scripts": {
-    "compiler": "browserify pages/scripts/compiler.js > pages/scripts/compiler.bundle.js",
+    "compiler": "browserify pages/scripts/compiler.browserify.js > pages/scripts/compiler.bundle.js",
+    "estools": "browserify pages/scripts/estools.browserify.js > pages/scripts/estools.bundle.js",
     "pages": "git subtree push --prefix pages github gh-pages"
   },
   "author": "Etienne Brodu <etn@etnbrd.com> (http://etnbrd.com/)",
@@ -24,7 +25,11 @@
     "esquery": "^0.3.0",
     "estraverse": "^1.8.0",
     "express": "^4.10.6",
+    "git-node": "^0.1.1",
     "js-beautify": "^1.5.4",
-    "recast": "^0.9.11"
+    "js-git": "^0.7.7",
+    "recast": "^0.9.11",
+    "tar": "^1.0.3",
+    "zip": "^1.2.0"
   }
 }

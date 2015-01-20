@@ -1,0 +1,3 @@
+setTimeout
+setInterval
+setImmediate

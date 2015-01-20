@@ -10,15 +10,20 @@
 
 
   <div class="container">
-    
     <div class='step'>
-      <input type="file" id="input">
+      <h1>Drop the zipball</h1>
+
+      <div class="fileUpload">
+        <span>Browse</span>
+        <input type="file" id="input" />
+      </div>
+
     </div>
 
   </div>
 
   <div class='control'>
-    <button class="next">next</button>
+    <button class="next" disabled="true">next</button>
   </div>
 
 
@@ -28,63 +33,45 @@
   <script src="scripts/jszip.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="scripts/jszip-utils.min.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript">
-    
-    // var fileInput = document.getElementById("input");
-    // var next = document.getElementById("next");
-    var fileInput = $('#input');
-    var nextButton = $('.next');
-    var container = $('.container');
 
     var URL = 'labels/';
 
+    //////////////////////////////////////
+    // GET THE ZIPBALL
+    //////////////////////////////////////
 
-    function getIdString(id) {
-      if (id && id.type === 'Identifier') {
-        return id.name;
-      }
+    // JSZipUtils.getBinaryContent('master.zip', function(err, data) {
+    //   if(err) throw err; // or handle err
+    //   doNext(function() {
+    //     ProcessZipBall(data)
+    //   });
+    // });
 
-      if (id && id.type === 'MemberExpression' && !id.computed) {
 
-        var object = getIdString(id.object);
-        var property = getIdString(id.property);
-        if (object && property)
-          return  object + '.' + property; 
-      }
+    function loadZipBall() {
 
-      return id
+      if (this.files.length !== 1) throw 'One and only one file expected, but ' + this.files.length + ' selected.';
+
+      var file = this.files[0];
+
+      var reader = new FileReader();
+      reader.onload = (function(aImg) {
+        return function(e) {
+          var zip = new JSZip(e.target.result);
+
+          displayZipBall(zip.files);
+          doNext(function() {
+            ProcessZipBall(zip);
+          })
+        };
+      })(file);
+
+      reader.readAsArrayBuffer(file);
     }
 
+    function ProcessZipBall(zip) {
 
-    function usedModules(file) {
-      var ast = esprima.parse(file);
-
-      // Build the parenting backlink needed for the next steps in the compilation.
-      estraverse.traverse(ast, {
-        enter: function(n, p) {
-          n.parent = p;
-        }
-      })
-
-      var res = esquery.query(ast, 'CallExpression > [name="require"]' );
-
-      var modules = res.reduce(function(modules, elm) {
-        if (elm.parent.arguments[0].type === 'Literal') {
-          modules.push(elm.parent.arguments[0].value)
-        }
-        return modules;
-      }, []);
-
-      return modules;
-    }
-
-    function doNext(fn) {
-      nextButton.off('click');
-      nextButton.on('click', fn);
-    }
-
-    function ProcessZipBall(data) {
-
-      var zip = new JSZip(data);
+      // var zip = new JSZip(data);
 
       var files = Object.keys(zip.files).reduce(function(files, filename) {
         if (filename.split('.').pop() === 'js') {
@@ -94,118 +81,62 @@
         return files;
       }, {});
 
-      // STEP 1 : ASK WHICH JS FILES TO CONVERT
-      // displayFiles(files);
+      processFiles(files);
 
-      function next() {
-        // STEP 1.2 : trim unchecked Files
-        processModules(getCheckedFiles(files));
+    }
+
+    function processFiles(files) {
+      var ProcessLabels = ProcessLabelsFactory(files);
+      var ProcessResults = ProcessResultFactory(files);
+
+      for(var filename in files) { var file = files[filename];
+        compiler(file.data, ProcessLabels.bind(file), ProcessResults.bind(file));
+      }
+    }
+
+    function ProcessLabelsFactory(files) {
+      var processed = Object.keys(files).length;
+
+      function synchro(err) {
+        if (err) throw err;
+
+        if (--processed === 0) {
+          processed = files.length
+          displayFiles(files);
+
+          doNext(function next() {
+            CompileFiles(files)
+          });
+        }
       }
 
-      doNext(next);
-    }
+      return function ProcessLabels(err, potentialRP, callback) {
+        if (err) throw err
+        // TODO display errors
 
-    function processModules(files) {
+        this.labels = potentialRP.reduce(function(labels, rp) {
+          var id = getIdString(rp.parent.callee);
 
-      // console.log(files)
-
-      var modules = Object.keys(files).reduce(function(modules, filename) { var file = files[filename];
-
-        return usedModules(file.data).reduce(function(modules, module) {
-          modules[module] = modules[module] || [];
-          modules[module].push(file.name);
-          return modules;
-        }, modules);
-      }, {})
-
-      // STEP 2 : ASK FOR MODULES COMPATIBILITY
-      displayModules(modules);
-
-
-
-
-
-      function next() {
-        // STEP 2.2 : compile stuff
-        var processed = Object.keys(files).length;
-        console.log('>>> NX ', processed);
-
-        function callback() {
-
-          console.log('>>> CB ', this.name);
-
-          var _callback = Array.prototype.pop.call(arguments);
-
-          function _next() {
-
-            console.log('>>> _NX', this.name);
-
-            // Call all the _callback only when the user consent
-            // _callback.apply(this, arguments);
-
-            console.log(processed);
-
-            if (--processed === 0) {
-              processed = files.length
-              displayLabels(files);
-            }
+          if (id) {
+            labels[id] = labels[id] || [];
+            labels[id].push(rp);
           }
 
-          Array.prototype.push.call(arguments, _next.bind(this));
+          return labels;
+        }, {})
 
-          ProcessLabels.apply(this, arguments);
-        }
+        $.ajax({
+          type: "GET",
+          url: URL + Object.keys(this.labels).join(','),
+          // crossDomain: true,
+          success: ProcessMarkers.bind(this),
+          dataType: 'JSON'
+        });
 
-        function end() {
-          // ProcessResult.apply(this, arguments);
-
-          if (--processed === 0) {
-            // displayResults(files);
-          }
-        }
-
-        for(var filename in files) { var file = files[filename];
-          compiler(file.data, callback.bind(file), end.bind(file));
-          // compiler(file.data, ProcessLabels.bind(file), ProcessResult.bind(file));        
-        }
-
+        this.compile = callback;
+        this.synchro = synchro;
       }
-
-      doNext(next);
     }
-
-
-    function ProcessLabels(err, potentialRP, callback) {
-      if (err) throw err
-      // TODO display errors
-
-      // STEP 3 : ASK FOR THE LABELS
-
-      this.labels = potentialRP.reduce(function(labels, rp) {
-        var id = getIdString(rp.parent.callee);
-
-        if (id) {
-          labels[id] = labels[id] || [];
-          labels[id].push(rp);
-        }
-
-        return labels;
-      }, {})
-
-      this.callback = callback;
-
-      $.ajax({
-        type: "GET",
-        url: URL + Object.keys(this.labels).join(','),
-        // crossDomain: true,
-        success: ProcessMarkers.bind(this),
-        dataType: 'JSON'
-      });
-
-      this.callback = callback;
-
-    }
-
 
     function ProcessMarkers(statusRP) {
 
@@ -241,28 +172,43 @@
       // console.log('MARKERS >> ', markers);
       // updateMarkers(markers);
 
-
-
-      // var rps = markers.reduce(function(rps, marker) {
-      //   if (marker.isRupturePoint)
-      //     rps.push(marker.rp.parent);
-
-      //   return rps;
-      // }, [])
-
-
-
       try {
-        this.callback(null, this.markers);
+        this.synchro(null);
       } catch (e) {
         displayError(e);
       }
     }
 
+    function CompileFiles(files) {
 
-    function ProcessResult() {
-      // console.log(arguments);
+      nextButton.off();
+
+      Object.keys(files).forEach(function(filename) { var file = files[filename];
+        if (file.checkbox.checked) {
+          var rps = file.markers.reduce(function(rps, marker) {
+            if (marker.checkbox.checked)
+              rps.push(marker.rp.parent);
+
+            return rps;
+          }, [])
+
+          file.compile(null, rps);
+        }
+      })
     }
+
+    function ProcessResultFactory(files) {
+      return function ProcessResult(err, result) {
+        this.result = result;
+        
+        if (Object.keys(files).every(function(filename) { var file = files[filename];
+          return !file.checkbox.checked || file.result;
+        })) {
+          displayResults(files);
+        }
+      }
+    }
+
 
 
     function UploadMarkers() {
@@ -283,60 +229,82 @@
 
     }
 
+    // function usedModules(file) {
+    //   var ast = esprima.parse(file);
+
+    //   // Build the parenting backlink needed for the next steps in the compilation.
+    //   estraverse.traverse(ast, {
+    //     enter: function(n, p) {
+    //       n.parent = p;
+    //     }
+    //   })
+
+    //   var res = esquery.query(ast, 'CallExpression > [name="require"]' );
+
+    //   var modules = res.reduce(function(modules, elm) {
+    //     if (elm.parent.arguments[0].type === 'Literal') {
+    //       modules.push(elm.parent.arguments[0].value)
+    //     }
+    //     return modules;
+    //   }, []);
+
+    //   return modules;
+    // }
+
+
+    function getIdString(id) {
+      if (id && id.type === 'Identifier') {
+        return id.name;
+      }
+
+      if (id && id.type === 'MemberExpression' && !id.computed) {
+
+        var object = getIdString(id.object);
+        var property = getIdString(id.property);
+        if (object && property)
+          return  object + '.' + property; 
+      }
+
+      return id
+    }
+
     //////////////////////////////////////
     // FRONT END
     //////////////////////////////////////
 
+    var fileInput = $('#input');
+    var nextButton = $('.next');
+    var container = $('.container');
 
-    function displayFiles(files) {
+    nextButton.prop('disabled', true);
+    fileInput.on('change', loadZipBall);
+
+    function doNext(fn) {
+      nextButton.off('click');
+      nextButton.on('click', function() {
+        nextButton.prop('disabled', true);
+        fn();
+      });
+      nextButton.prop('disabled', false);
+    }
+
+    function displayZipBall(files) {
       // console.log(files);
-
-      container.append(
+      container.find('.step .content').remove();
+      container.find('.step').append(
         Object.keys(files).reduce(function(list, filename) { var file = files[filename];
+          var spanFilename = $('<span class=\'filename\'>' + filename + '</span>');
+          var li = $('<li class=\'file\'></li>').append(spanFilename);
 
-          var checkbox = $('<input type=\'checkbox\' id=\'' + filename + '\' checked>');
-          var spanFilename = $('<label for=\'' + filename + '\'><span class=\'filename\'>' + filename + '</span><label>');
-          var spanFile = $('<pre class=\'code\'>' + file.data + '</pre>');
-          var li = $('<li class=\'file\'></li>').append(checkbox).append(spanFilename).append(spanFile);
-
-          list.find('ul').append(li);
-
-          return list;
-        }, $('<div class=\'step\'><h1>Select the files to compile</h1><ul class=\'files\'></ul></div>'))
-      );
-    }
-
-    function getCheckedFiles(files) {
-      $('.files > li > input:not(:checked) + .filename').each(function(index, filename) {
-        var name = $(filename).text();
-        delete files[name];
-      })
-
-      return files;
-    }
-
-
-    function displayModules(modules) {
-      // console.log(modules);
-
-      container.append(
-        Object.keys(modules).reduce(function(list, module) {
-
-          var spanModule = $('<span class=\'module\'>' + module + '</span>');
-          var spanFiles = $('<span class=\'files\'>' + modules[module].join(', ') + '</span>');
-          var li = $('<li></li>').append(spanModule).append(spanFiles);
-
-          list.find('ul').append(li);
-
-          return list;
-        }, $('<div class=\'step\'><h1>Do you already use promise-like modules ?</h1><ul class=\'modules\'></ul></div>'))
+          return list.append(li);
+        }, $('<div class=\'content\'><ul class=\'files\'></ul></div>'))
       )
 
     }
 
-    function displayLabels(files) {
-      console.log(files);
-      console.log('>>> DISPLAY LABELS');
+    function displayFiles(files) {
+      // console.log(files);
+      // console.log('>>> DISPLAY LABELS');
 
       container.append(
         Object.keys(files).reduce(function(list, filename) { var file = files[filename];
@@ -344,13 +312,15 @@
           // console.log(file);
 
           var checkbox = $('<input type=\'checkbox\' id=\'' + filename + '\' checked>');
+          file.checkbox = checkbox[0];
           var spanFilename = $('<label for=\'' + filename + '\'><span class=\'filename\'>' + filename + '</span><label>');
           var ulMarkers = file.markers.reduce(function(markers, marker) {
 
             var id = marker.loc.start.line + ':' + marker.loc.start.column
 
             var checkbox = $('<input type=\'checkbox\' id=\'' + id + '\' checked>');
-            var spanMarker = $('<label for=\'' + id + '\'><span class=\'filename\'>' + marker.label + '</span> </span class=\'position\'>' + marker.loc.start.line + ':' + marker.loc.start.column + '</span><label>');
+            marker.checkbox = checkbox[0];
+            var spanMarker = $('<label for=\'' + id + '\'><span class=\'marker\'>' + marker.label + '</span> </span class=\'position\'>' + marker.loc.start.line + ':' + marker.loc.start.column + '</span><label>');
             var li = $('<li class=\'marker\'></li>').append(checkbox).append(spanMarker);
 
             return markers.append(li);
@@ -358,7 +328,7 @@
             return markers
           }, $('<ul class=\'markers\'></ul>'));
 
-          var li = $('<li class=\'file\'></li>').append(spanFilename).append(ulMarkers);
+          var li = $('<li class=\'file\'></li>').append(checkbox).append(spanFilename).append(ulMarkers);
 
           list.find('ul.files').append(li);
 
@@ -368,6 +338,31 @@
 
     }
 
+    function displayResults(files) {
+
+      container.append(
+        Object.keys(files).reduce(function(list, filename) { var file = files[filename];
+          if (file.result) {
+            var spanFilename = $('<label for=\'' + filename + '\'><span class=\'filename\'>' + filename + '</span><label>');
+            var spanFile = $('<pre class=\'code\'>' + safeCode(file.result) + '</pre>');
+
+            var li = $('<li class=\'file\'></li>').append(spanFilename).append(spanFile);
+
+            list.find('ul.files').append(li);
+          }
+
+          return list;
+        }, $('<div class=\'step\'><h1>Results</h1><ul class=\'files\'></ul></div>'))
+      )
+
+    }
+
+    function safeCode(code) {
+
+      return code.replace(/</g, '&lt;')
+                 .replace(/>/g, '&gt;')
+                 .replace(/&/g, '\\&');
+    }
 
     function displayError(err) {
       console.error(err);
@@ -381,16 +376,6 @@
 
       // errors.append(error);
     }
-
-
-    //////////////////////////////////////
-    // GET THE ZIPBALL
-    //////////////////////////////////////
-
-    JSZipUtils.getBinaryContent('master.zip', function(err, data) {
-      if(err) throw err; // or handle err
-      ProcessZipBall(data)
-    });
 
   </script>
 

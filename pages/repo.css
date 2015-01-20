@@ -20,7 +20,7 @@ pre {
   font-family: "Inconsolata";
 }
 
-button {
+.fileUpload, button {
   display: inline-block;
   
   border: none;
@@ -35,6 +35,28 @@ button {
 
   box-shadow: inset 0 -2px 0 0 rgba(50, 50, 50, 0.2);
   background: rgb(255, 0, 73);
+}
+
+button[disabled] {
+  color: rgb(200, 200, 200);
+  background: rgb(230, 230, 230);
+}
+
+.fileUpload {
+  position: relative;
+  overflow: hidden;
+  margin: 10px;
+}
+.fileUpload #input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0;
+  filter: alpha(opacity=0);
 }
 
 .container, .control {
@@ -64,7 +86,7 @@ div.step:last-of-type {
   /*border: 1px solid green;*/
 }
 
-.step h1 {
+.step > h1 {
   padding: 20px 0;
   margin: 20px 0;
   border-bottom: 1px solid rgb(200, 200, 200);
@@ -84,9 +106,9 @@ ul {
   background: white;
 }
 
-.code {
+/*.code {
   display: none;
-}
+}*/
 
 .modules .files {
   color: gray;
@@ -100,6 +122,12 @@ input[type=checkbox] {
 
 input[type=checkbox]:not(:checked) + label {
   opacity: 0.2;
+}
+
+input[type=checkbox]:not(:checked) ~ ul {
+  display: none;
+  /*pointer-events: none;*/
+  /*opacity: 0.2;*/
 }
 
 input[type=checkbox] + label span:before {

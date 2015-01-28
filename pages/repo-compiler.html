@@ -32,9 +32,11 @@
   <script src="scripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="scripts/jszip.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="scripts/jszip-utils.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="scripts/FileSaver.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="scripts/Blob.js" type="text/javascript" charset="utf-8"></script>
   <script type="text/javascript">
 
-    var URL = 'labels/';
+    var api_url = 'labels/';
 
     //////////////////////////////////////
     // GET THE ZIPBALL
@@ -80,6 +82,10 @@
         }
         return files;
       }, {});
+
+      Object.defineProperty(files, '__zip', {value: zip});
+
+      // files.__zip = zip;
 
       processFiles(files);
 
@@ -127,7 +133,7 @@
 
         $.ajax({
           type: "GET",
-          url: URL + Object.keys(this.labels).join(','),
+          url: api_url + Object.keys(this.labels).join(','),
           // crossDomain: true,
           success: ProcessMarkers.bind(this),
           dataType: 'JSON'
@@ -159,7 +165,7 @@
             isRupturePoint : (async > sync),
             crowdGuess : (async > sync),
             count : sync + async,
-            accuracy : Math.max(async, sync) / (async + sync)
+            accuracy : Math.max(async, sync) / (async + sync) || 0
           }
         }
 
@@ -185,12 +191,20 @@
 
       Object.keys(files).forEach(function(filename) { var file = files[filename];
         if (file.checkbox.checked) {
+
           var rps = file.markers.reduce(function(rps, marker) {
-            if (marker.checkbox.checked)
+            if (marker.checkbox.checked) {
               rps.push(marker.rp.parent);
+            }
 
             return rps;
           }, [])
+
+          file.rps = rps;
+
+          UploadMarkers(file.markers);
+
+          MonkeyPatchCompile(file);
 
           file.compile(null, rps);
         }
@@ -209,22 +223,47 @@
       }
     }
 
+    function MonkeyPatchCompile(file) {
+
+      function getSelf(callee) {
+        if (callee.type === 'MemberExpression') {
+          return callee.object;
+        } else {
+          return {type: 'Identifier', name: 'global'};
+        }
+      }
+
+      if (file.checkbox.checked) {
+        file.rps.forEach(function(call) {
+          var callee = call.callee;
+          var newCallee = window.esprima.parse('require(\'due\').mock(a).call').body[0].expression;
+          var self = getSelf(callee);
+
+          newCallee.object.arguments[0] = callee;
+          call.arguments.unshift(self);
+          call.callee = newCallee;
+        })
+
+        // file.compile(null, file.rps);
+      }
+    }
 
 
-    function UploadMarkers() {
-      var labels = _markers.reduce(function(labels, marker) {
+    function UploadMarkers(markers) {
+
+      var labels = markers.reduce(function(labels, marker) {
 
         if (!labels[marker.label]
-        ||  labels[marker.label].isRupturePoint === marker.isRupturePoint) {
-          labels[marker.label] = {isRupturePoint: marker.isRupturePoint};
+        ||  labels[marker.label].isRupturePoint === marker.checkbox.checked) {
+          labels[marker.label] = {isRupturePoint: marker.checkbox.checked};
         } else {
-          delete labels[marker.label];
+          labels[marker.label].isRupturePoint = undefined;
         }
 
         return labels;
       }, {});
 
-      $.post(URL, JSON.stringify(labels))
+      $.post(api_url, JSON.stringify(labels))
       .fail(function(e) { console.log("error", e.statusCode()); });
 
     }
@@ -253,19 +292,41 @@
 
 
     function getIdString(id) {
-      if (id && id.type === 'Identifier') {
-        return id.name;
-      }
 
-      if (id && id.type === 'MemberExpression' && !id.computed) {
+      var string = window.escodegen.generate(id);
 
-        var object = getIdString(id.object);
-        var property = getIdString(id.property);
-        if (object && property)
-          return  object + '.' + property; 
-      }
+      string = string.split('\n');
+      if (string.length > 0)
+        string = string[0] + ' ... ';
 
-      return id
+      string = string.replace(/\//g, '_');
+
+      return string;
+    }
+
+
+    function getZipball(files, encoding) {
+      var zip = files.__zip;
+
+      Object.keys(zip.files).forEach(function(filename) { var file = files[filename];
+        if (file && file.result) {
+          zip.file(filename, file.result);
+        }
+      })
+
+      return zip.generate({type : encoding});
+    }
+
+    function getMonkeyZipball(files, encoding) {
+      var zip = files.__zip;
+
+      Object.keys(zip.files).forEach(function(filename) { var file = files[filename];
+        if (file && file.result) {
+          zip.file(filename, file.monkeyResult);
+        }
+      })
+
+      return zip.generate({type : encoding});
     }
 
     //////////////////////////////////////
@@ -311,16 +372,33 @@
 
           // console.log(file);
 
-          var checkbox = $('<input type=\'checkbox\' id=\'' + filename + '\' checked>');
+          var checked = (file.markers.some(function(marker) {
+            return marker.crowdGuess;
+          }) ? ' checked' : '');
+
+          var checkbox = $('<input type=\'checkbox\' id=\'' + filename + '\'' + checked + '>');
           file.checkbox = checkbox[0];
           var spanFilename = $('<label for=\'' + filename + '\'><span class=\'filename\'>' + filename + '</span><label>');
           var ulMarkers = file.markers.reduce(function(markers, marker) {
 
-            var id = marker.loc.start.line + ':' + marker.loc.start.column
-
-            var checkbox = $('<input type=\'checkbox\' id=\'' + id + '\' checked>');
+            var id = filename + ':' + marker.loc.start.line + ':' + marker.loc.start.column
+            var checkbox = $('<input type=\'checkbox\' id=\'' + id + '\'' + (marker.crowdGuess ? ' checked':'') + '>');
             marker.checkbox = checkbox[0];
-            var spanMarker = $('<label for=\'' + id + '\'><span class=\'marker\'>' + marker.label + '</span> </span class=\'position\'>' + marker.loc.start.line + ':' + marker.loc.start.column + '</span><label>');
+            var spanMarker = $('<label for=\'' + id + '\'><span class=\'marker\'>' + marker.label + '</span> <span class=\'position\'>' + marker.loc.start.line + ':' + marker.loc.start.column + '</span><label>');
+
+            var crowd = $([
+              '<span class=\'crowd ',
+              (marker.crowdGuess ? 'async' : 'sync'),
+              '\'><span class=\'accuracy\'>',
+              marker.accuracy * 100,
+              '%</span> / ',
+              '<span class=\'count\'>',
+              marker.count,
+              '</span></span>'
+              ].join(''));
+
+            spanMarker.append(crowd);
+
             var li = $('<li class=\'marker\'></li>').append(checkbox).append(spanMarker);
 
             return markers.append(li);
@@ -333,20 +411,23 @@
           list.find('ul.files').append(li);
 
           return list;
-        }, $('<div class=\'step\'><h1>Select the asynchronous continuations</h1><ul class=\'files\'></ul></div>'))
+        }, $('<div class=\'step\'><h1>Select the calls to duify</h1><ul class=\'files\'></ul></div>'))
       );
 
     }
 
     function displayResults(files) {
 
+      nextButton.remove();
+
       container.append(
         Object.keys(files).reduce(function(list, filename) { var file = files[filename];
           if (file.result) {
             var spanFilename = $('<label for=\'' + filename + '\'><span class=\'filename\'>' + filename + '</span><label>');
             var spanFile = $('<pre class=\'code\'>' + safeCode(file.result) + '</pre>');
+            // var spanMonkeyFile = $('<pre class=\'code\'>' + safeCode(file.monkeyResult) + '</pre>');
 
-            var li = $('<li class=\'file\'></li>').append(spanFilename).append(spanFile);
+            var li = $('<li class=\'file\'></li>').append(spanFilename).append(spanFile);//.append(spanMonkeyFile);
 
             list.find('ul.files').append(li);
           }
@@ -355,6 +436,35 @@
         }, $('<div class=\'step\'><h1>Results</h1><ul class=\'files\'></ul></div>'))
       )
 
+      var zipButton = $('<button>sources</button>');
+      // var monkeyButton = $('<button>ready-to-test sources</button>');
+
+      function downloadWithBlob(zip, filename) {
+        return function() {
+          try {
+            saveAs(zip, filename);
+          } catch(e) {
+            displayError(e);
+          }
+          return false;
+        }
+      }
+
+      function downloadWithDataURI(file) {
+        return function() {
+          window.location = "data:application/zip;base64," + file;
+        }
+      }
+
+      if (JSZip.support.blob) {
+        zipButton.click(downloadWithBlob(getZipball(files, "blob"), 'result.zip'));
+        // monkeyButton.click(downloadWithBlob(getMonkeyZipball(files, "blob"), 'monkey.zip'));
+      } else {
+        zipButton.click(downloadWithDataURI(getZipball(files, "base64")));
+        // monkeyButton.click(downloadWithDataURI(getMonkeyZipball(files, "base64")));
+      }
+
+      $('.control').append(zipButton);//.append(monkeyButton);
     }
 
     function safeCode(code) {

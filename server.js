@@ -40,13 +40,13 @@ function terminator(sig){
 };
 
 //  Process on exit and signals.
-process.on('exit', function() { self.terminator(); });
+process.on('exit', function() { terminator(); });
 
 // Removed 'SIGPIPE' from the list - bugz 852598.
 ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
  'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM',
 ].forEach(function(sig) {
-    process.on(sig, function() { self.terminator(sig); });
+    process.on(sig, function() { terminator(sig); });
 });
 
 //    BACK UP    //
@@ -111,10 +111,12 @@ app.post('/labels/', function(req, res) {
 
     for(var label in body) {
 
-      labels[label] = {
+      labels[label] = labels[label] || {
         sync: 0,
         async: 0
       }
+
+      console.log(labels[label]);
 
       if (body[label].isRupturePoint)
         labels[label].async += 1;

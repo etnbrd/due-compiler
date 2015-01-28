@@ -36,6 +36,7 @@
         width: 700px;
         max-width: 80%;
         margin: auto;
+        padding-top: 10%;
       }
 
       h1, h2 {
@@ -43,31 +44,80 @@
       }
 
       h1 {
-        background: yellow;
-        padding: 100px 0 0 0;
+        padding: 100px 10px 0px 10px;
         font-size: 4em;
+        color: rgba(255, 0, 73, 0.2);
+        background: rgb(255, 0, 73);
+        text-shadow: 0 -2px 0 rgba(50, 50, 50, 0.2);
+
+        margin-bottom: 40px;
       }
+
+      h2 {
+        margin-bottom: 10px;
+      }
+
+      p {
+        font-family: 'Roboto';
+        font-size: 2em;
+        font-weight: 100;
+      }
+
+      p + p {
+        border-bottom: 1px solid rgb(200, 200, 200);
+        margin-bottom: 40px;
+        padding-bottom: 40px;
+      }
+
+      a {
+        text-decoration: none;
+        display: inline-block;
+        
+        border: none;
+        border-radius: 2px;
+        padding: 0 10px;
+        margin-bottom: 10px;
+
+        text-align: center;
+        font-size: 1em;
+        font-weight: 900;
+        color: rgb(255, 0, 73);
+
+        box-shadow: inset 0 -2px 0 0 rgba(50, 50, 50, 0.2);
+        /*background: rgb(255, 0, 73);*/
+      }
+
+      a:hover {
+        box-shadow: inset 0 -2px 0 0 rgb(255, 0, 73);
+      }
+
     </style>
 </head>
 
 <body>
-  <h1>due</h1>
-  <h2>Due makes your callback behave well.</h2>
+  <h1>Due</h1>
 
-  If you use to write asynchronous Node.js code, you might have encounter the <a href="">Callback hell</a> aka Pyramid of Doom.
-  To avoid this pattern, it is common to wrap callback into Promises, or one of the equivalent (Q, Async, Vow ...).
-  A promise is simply a different pattern allowing to write asynchronous sequence as a cascade of call, instead of a pyramide of call.
-  Promises are coming in ECMAScript 6. so it is time to switch, and start writing better code.
-
-  Due is very similar to promises, except for two things.
-  <ul>
-    <li>The interface is slightly differnt. It doesn't expect two callbacks - one for success, one for rejection - like promises do, but only one. Exactly like th callback you are used to in node.js</li>
-    <li>A due doesn't provide the two methods all and race that promises provide. That means you need to synchronize your execution the same way you were used to in node.js, using variables and conditinos. For the more nerdy of you, that makes due sound regardless to promises, but not complete.</li>
-  </ul>
-
+  <p>
+  <h2>Dues make your callback behave well</h2>
+  If you use to write asynchronous Javascript code, you might have encounter the <a href="http://callbackhell.com/">Callback hell</a> <i>aka</i> Pyramid of Doom.
+  To avoid this pattern, you need to cleanly arrange your asynchronous execution flow, for example with Promises.
+  A Promise is a cleaner pattern allowing to write asynchronous sequence as a cascade of call, instead of a pyramide of call.
+  Promises are coming in ECMAScript 6.
+  </p>
+  <p>
+  <h2>It is time to switch, and start writing better code.</h2>
   However, you might already have tons of lines with callbacks. and you don't want to refactor everything.
-  Here we provide to you a due compiler
+  As a first step toward Promises, here are two Callbacks to Due compiler.
+  <a href="compiler.html">single file compiler</a> <a href="repo-compiler.html">project compiler</a>
+  </p>
 
-  <a href="compiler.html">online compiler</a>
+  <p>
+  <h2>Dues</h2>
+  Dues are like Promises, they provide the chainable <pre>then</pre> method.
+  However, they don't expect two callbacks like promises, but only one.
+
+  To use the compiler be aware that a Due, like a Promise, can only replace continuations : callbacks called only once, and asynchronously.
+  </p>
+
 </body>
 </html>

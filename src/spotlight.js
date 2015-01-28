@@ -4,6 +4,11 @@ var escodegen = require('escodegen'),
 function findPotentialRP(ast) {
   var rps = esquery.query(ast, 'CallExpression > FunctionExpression');
 
+  rps = rps.filter(function(rp) {
+    // Exclude IIFE
+    return rp.parent.callee !== rp;
+  })
+
   rps.forEach(function(callback) {
     callback.parent.rp = {
       callback: callback

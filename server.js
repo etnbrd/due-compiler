@@ -91,7 +91,7 @@ app.get('/labels/:labels', function(req, res) {
   console.log(pre('<'.yellow), wanted);
   // build answer
   var reply = wanted.reduce(function(reply, label) {
-    reply[label] = labels[label];
+    if (labels[label]) reply[label] = labels[label];
     return reply;
   }, {});
 

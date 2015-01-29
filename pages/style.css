@@ -1,5 +1,5 @@
 
-@import url(http://fonts.googleapis.com/css?family=Roboto:100,900);
+@import url(http://fonts.googleapis.com/css?family=Roboto:300,900);
 @import url(http://fonts.googleapis.com/css?family=Inconsolata:400,700);
 @import url(http://weloveiconfonts.com/api/?family=fontawesome);
 
@@ -29,18 +29,27 @@ a, button {
   text-align: center;
   font-size: 1em;
   font-weight: 900;
-  color: black;
+  color: white;
 
   box-shadow: inset 0 -2px 0 0 rgba(50, 50, 50, 0.2);
+
+  overflow: hidden;
+  vertical-align: top;
+
+  height: 40px;
 }
 
-a {
+/*a:hover, button:hover {
+  color: rgb(190, 0, 56);
+  text-shadow: 0 0 20px rgba(255, 74, 126, 1);
+}*/
+
+button, button:hover,
+a, a:hover {
   text-decoration: none;
-  background: rgb(230, 230, 230);
-}
-
-button {
+  /*background: rgb(230, 230, 230);*/
   background: rgb(255, 0, 73);
+  text-shadow: 1px  1px 0 rgb(230, 0, 68), 2px  2px 0 rgb(230, 0, 68), 3px  3px 0 rgb(230, 0, 68), 4px  4px 0 rgb(230, 0, 68), 5px  5px 0 rgb(230, 0, 68), 6px  6px 0 rgb(230, 0, 68), 7px  7px 0 rgb(230, 0, 68), 8px  8px 0 rgb(230, 0, 68), 9px  9px 0 rgb(230, 0, 68),10px 10px 0 rgb(230, 0, 68),11px 11px 0 rgb(230, 0, 68),12px 12px 0 rgb(230, 0, 68),13px 13px 0 rgb(230, 0, 68),14px 14px 0 rgb(230, 0, 68),15px 15px 0 rgb(230, 0, 68),16px 16px 0 rgb(230, 0, 68),17px 17px 0 rgb(230, 0, 68),18px 18px 0 rgb(230, 0, 68),19px 19px 0 rgb(230, 0, 68),20px 20px 0 rgb(230, 0, 68),21px 21px 0 rgb(230, 0, 68),22px 22px 0 rgb(230, 0, 68),23px 23px 0 rgb(230, 0, 68),24px 24px 0 rgb(230, 0, 68),25px 25px 0 rgb(230, 0, 68),26px 26px 0 rgb(230, 0, 68);
 }
 
 

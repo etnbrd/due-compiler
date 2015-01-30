@@ -12,6 +12,7 @@
 
       @import url(http://fonts.googleapis.com/css?family=Roboto:300,900);
       @import url(http://fonts.googleapis.com/css?family=Inconsolata);
+      @import url(http://weloveiconfonts.com/api/?family=fontawesome);
 
       * {
         padding: 0;
@@ -172,7 +173,6 @@ text-shadow: 1px  1px 0 rgb(240, 245, 245), 2px  2px 0 rgb(240, 245, 245), 3px  
 
       ul {
         padding-left: 100px;
-        font-size: 1em;
       }
 
       li {
@@ -224,6 +224,11 @@ text-shadow: 1px  1px 0 rgb(240, 245, 245), 2px  2px 0 rgb(240, 245, 245), 3px  
 
       span.emph {
         font-weight: 900;
+      }
+
+      .crowd::before {
+        font-family: "FontAwesome";
+        content: "";
       }
 
     </style>
@@ -312,12 +317,18 @@ my_fn(arg1)
 
   <p class='warning'>
     <img src="images/warning.png">
-    <ul>Before using the compiler, be aware that :
-      <li>Your code can not contain <span class='code'>eval</span> or <span class='code'>with</span></li>
-      <li>The callback must be a continuation : called asynchronously and only once.</li>
-      <li>This continuation must be a <span class='code'>FunctionExpression</span>.</li>
-      <li>Any value returned by the continuation or the callee can't be retrieved.<!-- For example the timer identifier returned by <span class='code'>SetTimeout</span>. --></li>
-    </ul>
+  </p>
+
+  <ul>Before using the compiler, be aware that :
+    <li>Your code can not contain <span class='code'>eval</span> or <span class='code'>with</span></li>
+    <li>The callback must be a continuation : called asynchronously and only once.</li>
+    <li>This continuation must be a <span class='code'>FunctionExpression</span>.</li>
+    <li>Any value returned by the continuation or the callee can't be retrieved.<!-- For example the timer identifier returned by <span class='code'>SetTimeout</span>. --></li>
+  </ul>
+
+  <p>
+    The compiler asks you to confirm that the couples callee / callback founds meet this above conditions.
+    The symbol <span class='crowd'></span> indicates what the community already indicated about it.
   </p>
 
   <p class="logos">

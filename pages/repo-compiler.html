@@ -4,6 +4,7 @@
   <title>due compiler</title>
   <meta charset="utf-8">
   <link rel="stylesheet" type="text/css" href="repo.css" media="screen"/>
+  <link href="styles/prism.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -23,7 +24,8 @@
   </div>
 
   <div class='control'>
-    <button class="next" disabled="true">next</button>
+    <a class = 'home' href="index.html">← home</a>
+    <button class="next" disabled="true">next →</button>
   </div>
 
 
@@ -34,6 +36,8 @@
   <script src="scripts/jszip-utils.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="scripts/FileSaver.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="scripts/Blob.js" type="text/javascript" charset="utf-8"></script>
+  <script src="scripts/prism.js" type="text/javascript"></script>
+
   <script type="text/javascript">
 
     var api_url = 'labels/';
@@ -389,7 +393,7 @@
             var crowd = $([
               '<span class=\'crowd ',
               (marker.crowdGuess ? 'async' : 'sync'),
-              '\'><span class=\'accuracy\'>',
+              '\'></span> <span class=\'accuracy\'>',
               marker.accuracy * 100,
               '%</span> / ',
               '<span class=\'count\'>',
@@ -424,7 +428,7 @@
         Object.keys(files).reduce(function(list, filename) { var file = files[filename];
           if (file.result) {
             var spanFilename = $('<label for=\'' + filename + '\'><span class=\'filename\'>' + filename + '</span><label>');
-            var spanFile = $('<pre class=\'code\'>' + safeCode(file.result) + '</pre>');
+            var spanFile = $('<pre class=\'code line-numbers\'><code class=\'language-javascript\'>' + safeCode(file.result) + '</code></pre>');
             // var spanMonkeyFile = $('<pre class=\'code\'>' + safeCode(file.monkeyResult) + '</pre>');
 
             var li = $('<li class=\'file\'></li>').append(spanFilename).append(spanFile);//.append(spanMonkeyFile);
@@ -436,7 +440,9 @@
         }, $('<div class=\'step\'><h1>Results</h1><ul class=\'files\'></ul></div>'))
       )
 
-      var zipButton = $('<button>sources</button>');
+      Prism.highlightAll();
+
+      var zipButton = $('<button class=\'save\'>sources</button>');
       // var monkeyButton = $('<button>ready-to-test sources</button>');
 
       function downloadWithBlob(zip, filename) {
@@ -475,16 +481,16 @@
     }
 
     function displayError(err) {
-      console.error(err);
+      // console.error(err);
 
-      // var error = $('<div class="error"><div class="close">✖</div><span class="message"></span></div>');
+      var error = $('<div class="error"><div class="close">✖</div><span class="message"></span></div>');
 
-      // $(error).find('.message').text(err);
-      // $(error).find('.close').click(function() {
-      //   error.remove();
-      // })
+      $(error).find('.message').text(err);
+      $(error).find('.close').click(function() {
+        error.remove();
+      })
 
-      // errors.append(error);
+      errors.append(error);
     }
 
   </script>

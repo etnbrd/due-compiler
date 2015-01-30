@@ -17,8 +17,12 @@ html, body {
   font-weight: 100;
 }
 
-.fileUpload, button,
-.fileUpload:hover, button:hover {
+a {
+  text-decoration: none;
+}
+
+.fileUpload, button, a,
+.fileUpload:hover, button:hover, a {
   display: inline-block;
   
   border: none;
@@ -55,7 +59,7 @@ button[disabled] {
 .fileUpload {
   position: relative;
   overflow: hidden;
-  margin: 10px;
+  /*margin: 10px;*/
 }
 .fileUpload #input {
   position: absolute;
@@ -81,9 +85,13 @@ button[disabled] {
   margin-top: 20px;
 }
 
-.control * {
+.control button {
   float: right;
   margin-left: 12px;
+}
+
+.control .home {
+  float: left;
 }
 
 .step {
@@ -174,4 +182,9 @@ input[type=checkbox]:not(:checked) + label .filename:before {
 
 .crowd.async::before {
   color: rgb(255, 0, 73);
+}
+
+.save::before {
+  font-family: "FontAwesome";
+  content: '   ';
 }

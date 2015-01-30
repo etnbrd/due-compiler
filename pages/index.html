@@ -183,7 +183,7 @@ text-shadow: 1px  1px 0 rgb(240, 245, 245), 2px  2px 0 rgb(240, 245, 245), 3px  
         float: left;
         width : 75px;
         margin-right: 30px;
-        padding-top: 5px;
+        padding-top: 20px;
       }
 
       .logos {
@@ -313,6 +313,7 @@ my_fn(arg1)
   <p class='warning'>
     <img src="images/warning.png">
     <ul>Before using the compiler, be aware that :
+      <li>Your code can not contain <span class='code'>eval</span> or <span class='code'>with</span></li>
       <li>The callback must be a continuation : called asynchronously and only once.</li>
       <li>This continuation must be a <span class='code'>FunctionExpression</span>.</li>
       <li>Any value returned by the continuation or the callee can't be retrieved.<!-- For example the timer identifier returned by <span class='code'>SetTimeout</span>. --></li>

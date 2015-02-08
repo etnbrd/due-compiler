@@ -90,8 +90,13 @@ button[disabled] {
   margin-left: 12px;
 }
 
-.control .home {
+.control .home,
+.control .back {
   float: left;
+}
+
+.control .back {
+  margin-left: 12px;
 }
 
 .step {
@@ -186,5 +191,6 @@ input[type=checkbox]:not(:checked) + label .filename:before {
 
 .save::before {
   font-family: "FontAwesome";
+  font-weight: 100;
   content: '   ';
 }

@@ -8,5 +8,6 @@ function print(ast) {
 }
 
 module.exports = function(ast, callback) {
-  callback(null, beautify(print(ast), { indent_size: 2 }));
+  callback(null, print(ast), { indent_size: 2 });
+  // callback(null, beautify(print(ast), { indent_size: 2 }));
 }

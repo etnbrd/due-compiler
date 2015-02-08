@@ -21,6 +21,9 @@ module.exports = function compiler(code, filterRP, callback) {
   .then(meet(treeBuilder))
   .then(meet(chainBuilder))
   .then(function(err, chains) {
+
+    displayStats(chains);
+
     chains.forEach(function(chain) {
 
       // Find the identifiers
@@ -60,4 +63,28 @@ function returnBlockStatement(block) {
     return block.body
 
   // TODO what about the try / catch stuffs : they declare a new scope
+}
+
+function displayStats(chains) {
+
+  function chainLength(link) {
+    if (link.children.length > 0) {
+      return chainLength(link.children[0]) + 1
+    }
+
+    return 1;
+  }
+
+  var results = chains.reduce(function(stats, chain) {  
+
+    var lgth = chainLength(chain);
+
+    stats[lgth] = stats[lgth] || 0;
+    stats[lgth]++;
+    return stats;
+  }, []).reduce(function(str, count, i) {
+    return str + ', ' + i + ': ' + count; 
+  }, '')
+
+  console.log('>> ' + chains.length + ' chains : ' + results);
 }

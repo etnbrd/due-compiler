@@ -14,7 +14,12 @@ function treesBuilder(rps, callback) {
 
     // Break the chain if we enter a new *stuff* that can return something -> we wouldn't be able to return the due.
     if (node.type === 'FunctionExpression' && !node.parent.isRupturePoint
-    ||  node.type === 'FuncitionDeclaration') {
+    ||  node.type === 'FuncitionDeclaration'
+    ||  node.type === 'WhileStatement'
+    ||  node.type === 'DoWhileStatement'
+    ||  node.type === 'ForStatement'
+    ||  node.type === 'ForOfStatement'
+    ||  node.type === 'ForInStatement') {
       return null;
     }
 

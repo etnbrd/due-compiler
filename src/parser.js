@@ -1,4 +1,5 @@
 var esprima = require('esprima'),
+    recast = require('recast'),
     escope = require('escope'),
     esquery = require('esquery'),
     estraverse = require('estraverse');
@@ -44,6 +45,16 @@ function populate(variable) {
 }
 
 function parse(code, callback) {
+
+  // Esprima doesn't like the #! in the beginning of node script files, so we remove the first line.
+  if (code[0] === '#') {
+    code = code.slice(code.indexOf('\n'));
+  }
+
+  // var ast = recast.parse(code);
+
+  console.log(code);
+
   var ast = esprima.parse(String(code), {
     // Parser Options
     loc: true

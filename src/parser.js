@@ -53,7 +53,7 @@ function parse(code, callback) {
 
   // var ast = recast.parse(code);
 
-  console.log(code);
+  // console.log(code);
 
   var ast = esprima.parse(String(code), {
     // Parser Options

@@ -125,6 +125,8 @@
         if (err) throw err
         // TODO display errors
 
+        console.log('>> ', this.name, potentialRP.length);
+
         this.labels = potentialRP.reduce(function(labels, rp) {
           var id = getIdString(rp.parent.callee);
 

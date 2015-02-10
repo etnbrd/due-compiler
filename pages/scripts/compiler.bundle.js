@@ -35471,7 +35471,7 @@ function parse(code, callback) {
 
   // var ast = recast.parse(code);
 
-  console.log(code);
+  // console.log(code);
 
   var ast = esprima.parse(String(code), {
     // Parser Options
@@ -35588,8 +35588,8 @@ function declarationRelocator(block, identifiers) {
 
       } else if (definition.type === 'FunctionDeclaration') {
 
-        console.log(definition);
-        console.log(block);
+        // console.log(definition);
+        // console.log(block);
 
         // Replace the declaration with an assignation of the declaration (might need to change declaration into expression)
         var declarationIndex = block.body.body.indexOf(definition);

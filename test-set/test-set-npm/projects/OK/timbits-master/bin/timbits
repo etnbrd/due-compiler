@@ -1,0 +1,339 @@
+#!/usr/bin/env node
+
+// load modules
+var fs = require('fs')
+  , util = require('util')
+  , path = require('path')
+  , spawn = require("child_process").spawn
+  , which = require(path.join(__dirname, '..', 'node_modules', 'which')).sync;
+
+// configure optimist
+var optimist = require(path.join(__dirname, '..', 'node_modules', 'optimist'))
+  .alias('coffee', 'c')
+  .describe('c', 'language: Use coffee-script files')
+  .alias('all', 'a')
+  .describe('a', 'test: run all dynamic tests')
+  .alias('R', 'reporter').string('R')
+  .describe('R', 'test: specify reporter to use')
+  .alias('g', 'grep').string('g')
+  .describe('g', 'test: only run tests matching <pattern>')
+  .alias('i', 'invert')
+  .describe('i', 'test: inverts --grep matches')
+  .alias('t', 'timeout').default('t', 2000)
+  .describe('t', 'test: set test-case timeout in milliseconds')
+  .alias('s', 'slow').default('s', 75)
+  .describe('s', 'test: "slow" test threshold in milliseconds')
+  .alias('w', 'watch')
+  .describe('w', 'test: watch for changes and retest')
+  .alias('d', 'debug')
+  .describe('d', 'test: enable node debugger')
+  .alias('b', 'bail')
+  .describe('b', 'test: bail after first test failure')
+  .usage(
+"Timbits Command Help\n\n \
+timbits n[ew] [project] [-c|--coffee]\n\ \
+  Creates new project template and subfolders\n\n \
+timbits g[enerate] [timbit] [-c|--coffee]\n \
+  Scaffolds a new timbit and default view\n\n \
+timbits s[erver] [filename]\n \
+  Launches runjs with [server.js]\n\n \
+timbits t[est] [options]\n \
+  Run mocha test cases\n\n \
+timbits [-]v[ersion]\n \
+  Displays installed timbits library version \
+  ");
+
+// determine path to our project template files
+var template = path.join(__dirname, 'template');
+
+// determine path to a command in local node modules
+function localCmd(name) {
+  var cmd = path.join(__dirname, '..', 'node_modules', '.bin', name);
+  if(process.platform === 'win32') {
+    cmd += '.cmd';
+  }
+  return cmd;
+}
+
+function cp(source, destination) {
+  var data = fs.readFileSync(source);
+  fs.writeFileSync(destination, data);
+}
+
+function loadEnv() {
+  if (fs.existsSync('.env')) {
+    var env_lines = fs.readFileSync('.env').toString().split('\n');
+    for (var i = 0; i < env_lines.length; i++) {
+      var key_value = env_lines[i].trim().split('=');
+      if (key_value.length === 2) {
+        console.log('Setting env var: ' + env_lines[i]);
+        process.env[key_value[0]] = key_value[1];
+      }
+    }
+  }
+}
+
+function newProject(name, ext) {
+  console.log("Creating project '" + name + "'");
+  
+  var directories = ["timbits", "views", "test"];
+  var files = ["History.md", "README.md", "LICENSE"];
+  
+  var project_home = path.join(process.cwd(), name);
+  
+  if(fs.existsSync(project_home)) {
+    console.error('\033[31mERROR! ' + project_home + ' already exists!\033[0m');
+    return;
+  }
+  
+  // create parent directory
+  console.log('Creating project directory: ' + project_home);
+  fs.mkdirSync(project_home);
+  
+  // create child directories
+  for (var i = 0; i < directories.length; i++) {
+    console.log('Creating child directory: ' + directories[i]);
+    fs.mkdirSync(path.join(project_home, directories[i]));
+  }
+  
+  // copy template files
+  for (var i = 0; i < files.length; i++) {
+    console.log('Copying template file: ' + files[i]);
+    cp(
+      path.join(template, files[i]),
+      path.join(project_home, files[i])
+    );
+  }
+
+  // copy server.js file
+  if (ext == 'js') {
+    console.log('Copying template file: server.js');
+    cp(
+      path.join(template, 'server.js'),
+      path.join(project_home, 'server.js')
+    );
+  } else {
+   console.log('Copying template file: server_coffee.js -> server.js');
+   cp(
+      path.join(template, 'server_coffee.js'),
+      path.join(project_home, 'server.js')
+   );
+  }
+  
+  // copy test template
+  console.log('Generating test template: ' + name + '-test.' + ext );
+  cp(
+    path.join(template, 'test', 'timbits-test.' + ext),
+    path.join(project_home, 'test', name + '-test.' + ext)
+  );
+  
+  // create package file
+  console.log('Generating package.json: package.json');
+  var pkg;
+  if ( ext == 'js' ) {
+    pkg = {
+      name: name,
+      description: 'Widgets built using Timbits',
+      version: '0.0.1',
+      dependencies: {
+        timbits: getPackage().version
+      }
+    };
+  } else {
+    pkg = {
+      name: name,
+      description: 'Widgets built using Timbits',
+      version: '0.0.1',
+      dependencies: {
+        timbits: getPackage().version,
+        'coffee-script': '~1.3.3'
+      }
+    };
+  }
+  fs.writeFileSync(
+    path.join(project_home, 'package.json'),
+    JSON.stringify(pkg)
+  );
+   
+  // prompt user to configure npm package
+  var npm_init = spawn(
+    which('npm'),
+    ['init'],
+    {
+      cwd: project_home,
+      env: process.env,
+      stdio: 'inherit'
+    }
+  );
+  
+  npm_init.on('exit', function(code) {
+    if(code === 0) {
+      // install dependencies
+      spawn(
+        which('npm'),
+        ['install', '-d'],
+        {
+          cwd: project_home,
+          env: process.env,
+          stdio: 'inherit'
+        }
+      );
+    }
+    
+    console.log('Finished!');
+  });
+  
+}
+
+function generateTimbit(name, ext) {
+  console.log("Generating timbit '" + name + "'");
+  if(
+    fs.existsSync(path.join('timbits', name + '.' + ext)) ||
+    fs.existsSync(path.join('views', name))
+  ) {
+    console.error('\033[31mERROR!  The timbit ' + name + ' may already exist!\033[0m');
+    return;
+  }
+
+  if (
+    ! fs.existsSync(path.join('timbits')) ||
+	! fs.existsSync(path.join('views'))
+  ) {
+    console.error('\033[31mERROR!  Current folder does not appear to be timbits project!\033[0m');
+    return;
+  }
+  
+  // create timbit
+  console.log('Creating timbits/' + name + '.' + ext);
+  cp(
+    path.join(template, 'timbit.' + ext),
+    path.join('timbits', name + '.' + ext)
+  );
+  
+  // create default view
+  console.log('Creating views/' + name + '/default.hjs');
+  fs.mkdirSync(
+    path.join('views', name)
+  );
+  
+  fs.writeFileSync(
+    path.join('views', name, 'default.hjs'),
+    "<h1>Default {{name}} Timbit View</h1>"
+  );
+  
+}
+
+
+
+function startServer(filename) {
+  console.log("Starting server (" + filename + ")");
+  loadEnv();
+
+  spawn(localCmd('runjs'), [filename], {
+    stdio: [null, process.stdout, process.stderr],
+    env: process.env
+  });
+}
+
+function runTests(alltests, options) {
+  if (alltests) {
+    process.env.TIMBITS_TEST_WHICH = 'all';
+  }
+  loadEnv();
+
+  var mocha = spawn(localCmd('mocha'), options, {
+    stdio: [null, process.stdout, process.stderr],
+    env: process.env
+  });
+}
+
+function getPackage() {
+  var data = fs.readFileSync(path.join(__dirname, '..', 'package.json'));
+  return JSON.parse(data);
+}
+
+function showVersion() {
+  var pkg = getPackage();
+  console.log(pkg.version);
+}
+
+function showHelp() {
+  console.log(optimist.help());
+}
+
+var argv = optimist.argv;
+var ext;
+switch (argv._[0]) {
+  case 'n':
+  case 'new':
+    if (argv._.length < 2) {
+      console.error('\033[31mnew project requires a name\033[0m');
+      showHelp();
+    } else {
+	  if ( argv['c'] || argv['coffee'] ) {
+		ext = 'coffee';
+	  } else {
+	    ext = 'js';
+	  }
+	  newProject(argv._[1], ext);
+    }
+    break;
+    
+  case 'g':
+  case 'generate':
+    if (argv._.length < 2) {
+      console.error('\033[31mnew timbit requires a name\033[0m');
+      showHelp();
+    } else {
+      if ( argv['c'] || argv['coffee'] ) {
+	    ext = 'coffee';
+	  } else {
+	    ext = 'js';
+	  }
+	  generateTimbit(argv._[1], ext);
+    }
+    break;
+    
+  case 's':
+  case 'server':
+    filename = argv._.length > 1 ? optimist.argv._[1] : 'server.js';
+    startServer(filename);
+    break;
+    
+  case 't':
+  case 'test':
+    options = ['--growl', '--colors'];
+    for (key in argv) {
+      switch(key){
+        case 'reporter':
+        case 'grep':
+        case 'timeout':
+        case 'slow':
+          options.push('--' + key, argv[key]);
+          break;
+        case 'invert':
+        case 'watch':
+        case 'debug':
+        case 'bail':
+          options.push('--' + key)
+          break;
+        case 'coffee':
+          options.push( '--compilers', 'coffee:coffee-script' );
+          break;
+      }
+    }
+    runTests(argv.a, options);
+    break;
+    
+  case 'v':
+  case 'version':
+    showVersion();
+    break;
+    
+  default:
+    if (argv.v != null) {
+      showVersion();
+    } else {
+      showHelp();
+    }
+}

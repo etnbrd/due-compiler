@@ -1,0 +1,54 @@
+{
+  "name": "code-connect-server",
+  "preferGlobal": true,
+  "version": "0.1.10",
+  "author": "John Wu <webmaster@leapoahead.com>",
+  "description": "server end for code connect (an extension for brackets)",
+  "contributors": [ 
+    {
+      "name": "John Wu",
+      "email": "webmaster@leapoahead.com"
+    },
+    {
+      "name": "Tony He",
+      "email": "coolhzb@163.com"
+    }
+  ],
+  "main": "./bin/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tjwudi/code-connect-server.git"
+  },
+  "keywords": [
+    "brackets",
+    "code-connect",
+    "connect",
+    "realtime",
+    "socket.io",
+    "extension",
+    "brackets-extension"
+  ],
+  "dependencies" : {
+    "socket.io"         :   "*",
+    "express"           :   "3.x",
+    "underscore"        :   "*",
+    "commander"         :   "*"
+  },
+  "devDependencies": {
+    "mocha"             :   "*", 
+    "should"            :   "*",
+    "socket.io-client"  :   "*",
+    "request"           :   "*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.6"
+  },
+  "bin": {
+      "code-connect-server": "./bin/main.js"
+  },
+  "scripts": {
+    "start": "node ./bin/main.js",
+    "test": "mocha"
+  }
+}

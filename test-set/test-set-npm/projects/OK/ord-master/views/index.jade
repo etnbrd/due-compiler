@@ -1,0 +1,10 @@
+extends layout
+block content
+
+  h1 Ord
+
+  form.splash(method="get" action="/search")
+    input(name="query" type="text" placeholder="Translate any word" autocapitalize="off" autocorrect="off" autofocus="autofocus")
+    select(name="lang")
+      each key in Object.keys(wikipedias)
+        option(value=key)= wikipedias[key].language

@@ -1,0 +1,294 @@
+!!!
+html
+  head
+    title Mothereffing GIFSockets!!!
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(href="/public/css/bootstrap.min.css", rel="stylesheet", type="text/css", media="all")
+    link(href="/public/css/bootstrap-responsive.min.css", rel="stylesheet", type="text/css", media="all")
+    style.
+      body {
+        background: url(/public/img/background.png);
+      }
+
+      body,
+      textarea,
+      input,
+      .btn {
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .btn-prominent {
+        font-size: 20px;
+        padding: 20px;
+        font-weight: bold;
+      }
+
+      /* http://twbs.github.io/bootstrap/2.3.2/scaffolding.html#responsive */
+      /* Breakpoints should be: */
+      /* 480px (no columns/gutter) */
+      /* 768px (42px col, 20px gutter) */
+      /* 980px (60px col, 20px gutter) */
+      /* 1200px (70px col, 30px gutter) */
+      .header h1 {
+        font-size: 70px;
+        line-height: 120px;
+      }
+
+      @media (max-width: 980px) {
+        .header h1 {
+          font-size: 52px;
+          line-height: 75px;
+        }
+      }
+
+      /* #GIFSOCKET-DIMENSIONS */
+      /* min-width = 600px with 20px gutter */
+      @media(min-width: 640px) {
+        .gifsocket {
+          /* #GIFSOCKET-DIMENSIONS */
+          width: 600px;
+          height: 380px;
+          background: #666;
+          display: block;
+          margin: 0 auto;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .header h1 {
+          font-size: 45px;
+          line-height: 60px;
+        }
+      }
+
+      .github-ribbon {
+        position: absolute;
+        display: block;
+        top: 0;
+        right: 0;
+        border: 0;
+      }
+
+      @media (max-width: 480px) {
+        .github-ribbon {
+          display: none;
+        }
+      }
+
+      /* These classes are totally improperly named. yey. */
+      .push--top {
+        margin-top: 60px;
+      }
+
+      .push-half--top {
+        margin-top: 20px !important;
+      }
+
+      .drag-entered {
+        opacity: 0.5;
+      }
+
+      .block-center {
+        display: block;
+        float: none;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      @media (max-width: 768px) {
+        .form-horizontal-phone {
+          padding-right: 20px;
+        }
+
+        .form-horizontal-phone input {
+          width: 100%;
+        }
+      }
+
+  body
+    .container
+      .header.text-center
+        h1 Mothereffing GIFSockets!!!
+      .well
+        :markdown
+          GIFSockets are animated [GIFs][] that never end. We keep an open connection and write new frames as they come in.
+
+          Try submitting some text or [Drag n' Dropping] an image below!
+
+          [GIFs]: http://en.wikipedia.org/wiki/Graphics_Interchange_Format
+          [Drag n' Dropping]: https://developer.mozilla.org/en-US/docs/DragDrop/Drag_and_Drop
+
+      .row.text-center
+        p.span12.text-center
+          img.gifsocket(src="/image.gif")
+      div
+        iframe.hidden(name="request-frame", width=0, height=0)
+        form#gifsocket-form(method="POST", action="/image/text", target="request-frame")
+          .row
+            .span12
+              // There is a server imposed max length of 4096 (implementation limitation), this is just to be nice.
+              textarea#gifsocket-text.input-block-level(name="text", maxlength=4096) Hello World!
+          .row.form-inline.form-horizontal-phone
+            p.span3
+              label(for="foreground") Foreground:&nbsp;
+              input.input-small(name="foreground", value="#BADA55", type="text")
+            p.span3
+              label(for="background") Background:&nbsp;
+              input.input-small(name="background", value="#000000", type="text")
+            p.span3
+              label(for="font-size") Font size:&nbsp;
+              input.input-small(name="font-size", value="30", type="text")
+            p.span3
+              label(for="font-family") Font family:&nbsp;
+              input.input-small(name="font-family", value="Impact", type="text")
+
+          .row
+            .span12
+              p.push-half--top
+                button.span3.block-center.btn.btn-primary.btn-large.btn-prominent Submit
+      div.push--top
+        .section
+          h2.text-center Explanation
+          .well
+            :markdown
+              If you think you have seen this before,
+              you have. [GIFSockets][] were originally
+              implemented in [Clojure][] using [Java][]
+              libraries for [GIF][] encoding.
+
+              [GIFSockets]: https://github.com/videlalvaro/gifsockets
+              [Clojure]: http://en.wikipedia.org/wiki/Clojure
+              [Java]: http://en.wikipedia.org/wiki/Java_%28programming_language%29
+              [GIF]: http://en.wikipedia.org/wiki/Graphics_Interchange_Format
+
+              Unfortunately, it was not trivial to set up.
+              Especially if you have not had experience with
+              [Clojure][] in the past.
+
+              This project is a reimplementation in [JavaScript][]
+              using a fork of [gif.js][] for encoding and
+              [PhantomJS][] for [canvas][] preparation.
+
+              [JavaScript]: http://en.wikipedia.org/wiki/ECMAScript
+              [gif.js]: http://jnordberg.github.io/gif.js/
+              [PhantomJS]: http://phantomjs.org/
+              [canvas]: https://developer.mozilla.org/en-US/docs/HTML/Canvas
+
+              To run this website locally:
+
+              ```bash
+              npm install -g gifsockets-server phantomjs-pixel-server
+              phantomjs-pixel-server &
+              gifsocket-server
+              # Website will be available at http://localhost:8000/
+              ```
+
+    script.
+      var _gaq = _gaq || [];
+      _gaq.push([
+        '_setAccount',
+        window.location.href.indexOf('localhost') === -1 ? 'UA-45607410-1' : 'UA-45607410-2'
+      ]);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+
+        var $gifsocketForm = document.getElementById('gifsocket-form');
+        var $gifsocketText = document.getElementById('gifsocket-text');
+        $gifsocketForm.onsubmit = function () {
+          var text = $gifsocketText.value;
+          _gaq.push(['_trackEvent', 'Form submit', text]);
+        };
+      })();
+    script(src="/public/js/jquery.js")
+    script.
+      (function () {
+        var $gifsocketForm = $('#gifsocket-form');
+        $('textarea').on('keydown', function submitOnEnter (e) {
+          // If the enter key was pressed, stop the default action and submit the form
+          if ((e.ctrlKey || e.metaKey) && e.keyCode === 13) {
+            e.preventDefault();
+            $gifsocketForm.submit();
+          }
+       });
+      }());
+    script(src="/public/js/filereader.js")
+    script.
+      (function () {
+        // #GIFSOCKET-DIMENSIONS
+        var gifsocketWidth = 600;
+        var gifsocketHeight = 380;
+
+        var $canvas = document.createElement('canvas');
+        $canvas.width = gifsocketWidth;
+        $canvas.height = gifsocketHeight;
+
+        var $gifsocket;
+        if (document.getElementsByClassName) {
+          $gifsocket = document.getElementsByClassName('gifsocket')[0];
+        }
+
+        if ($gifsocket && $canvas.getContext) {
+          var context = $canvas.getContext('2d');
+          context.font = '30px Impact';
+          context.fillStyle = '#000000';
+          context.fillRect(0, 0, gifsocketWidth, gifsocketHeight);
+          context.fillStyle = '#BADA55';
+          context.fillText('Waiting for input...', 15, 30 + 15);
+          $gifsocket.style.cssText = 'background: url("' + $canvas.toDataURL() + '");';
+        }
+
+        if ($gifsocket && document.body.addEventListener) {
+          FileReaderJS.setupDrop($gifsocket, {
+            dragClass: 'drag-entered',
+            on: {
+              loadend: function (e, file) {
+                var target = e.target;
+                var img = new Image();
+                img.src = target.result;
+                img.onload = function () {
+                  var context = $canvas.getContext('2d');
+                  context.clearRect(0, 0, gifsocketWidth, gifsocketHeight);
+                  context.drawImage(img, 0, 0);
+                  // TODO: Consider alternative padding
+                  var dataStr = JSON.stringify([].slice.call(context.getImageData(0, 0, gifsocketWidth, gifsocketHeight).data));
+                  // DEV: I could code this by hand but really not worth the trouble
+                  $.post('/image/json', dataStr);
+                  _gaq.push(['_trackEvent', 'Image uploaded', 'Yep']);
+                };
+                img.onerror = function () {
+                  alert('Error converting file to image');
+                };
+              },
+              error: function(e, file) {
+                alert('Error during process of error');
+              },
+              skip: function (file) {
+                alert('File was invalid type');
+              }
+            }
+          });
+          //- TODO: Continue with setup of this
+          //- FileReaderJS.setupClipboard(document.body, opts);
+
+          //- if (window.location.href.indexOf('localhost') !== -1) {
+          //-   $.post('/image/text', 'text=hello\nworld&foreground=' + encodeURIComponent('#BADA55'));
+          //- }
+        }
+
+        //- TODO: We can notify user to reload page on timeout
+        //- TODO: or automatically reload
+        //- TODO: We can add this directly to the gif to ensure everything is good
+        //- document.body.onload = function () {
+        //-   console.log('load complete');
+        //- };
+      }());
+
+    //- end of .container
+    a.github-ribbon(href="https://github.com/twolfson/gifsockets-server")
+      img(src="/public/img/github-ribbon.png", alt="Fork me on GitHub")
+  //- end of body

@@ -1,0 +1,52 @@
+{
+  "name": "moonridge",
+  "version": "0.6.9",
+  "main": "main.js",
+  "author": "Capaj <capajj@gmail.com>",
+  "description": "Bring your Mongoose models straight into angular web app with live Query support, all thanks to the magic of socket.io",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "socket.io",
+    "rpc",
+    "model",
+    "liveQuery",
+    "realtime",
+    "mongo",
+    "mongoDB",
+    "isomorphic",
+    "mean",
+    "meteor",
+    "angular",
+    "mongoose",
+    "mongoosejs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/capaj/Moonridge.git"
+  },
+  "homepage": "http://capaj.github.io/Moonridge/",
+  "dependencies": {
+    "bluebird": "~2.7",
+    "express": "^4.11",
+    "lodash": "~2.4",
+    "moonridge-client": "^0.6.9",
+    "socket.io": "1.2.1",
+    "socket.io-rpc": "0.8.9",
+    "winston": "~0.8"
+  },
+  "peerDependencies": {
+    "mongoose": "^3.8"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "grunt": "~0.4",
+    "grunt-angular-templates": "~0.5",
+    "grunt-contrib-less": "~1.0",
+    "grunt-contrib-uglify": "~0.7",
+    "grunt-ng-annotate": "~0.8",
+    "mocha": "^2.1.0"
+  },
+  "license": "MIT"
+}

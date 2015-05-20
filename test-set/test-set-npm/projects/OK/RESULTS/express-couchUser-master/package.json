@@ -1,0 +1,54 @@
+{
+  "name": "express-user-couchdb",
+  "version": "0.3.5",
+  "description": "An express app module connected to couchdb _users table",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/twilson63/express-couchUser.git"
+  },
+  "keywords": [
+    "couchdb",
+    "express",
+    "module",
+    "_users",
+    "authentication"
+  ],
+  "author": "Tom",
+  "license": "MIT",
+  "dependencies": {
+    "express": "~3.2.6",
+    "nano": "~5.10.0",
+    "uuid": "~1.4.1",
+    "nodemailer": "~0.4.4",
+    "email-templates": "~0.1.0",
+    "underscore": "~1.5.1",
+    "only": "0.0.2"
+  },
+  "readmeFilename": "readme.md",
+  "dist": {
+    "shasum": "c21ddc09ac252d74e8b0e820d6aa74a89848ac2c"
+  },
+  "_resolved": "git://github.com/twilson63/express-couchUser.git#2ccd791c6c62a849ee19e88e8a1920e74130f35e",
+  "_from": "git://github.com/twilson63/express-couchUser.git",
+  "gitHead": "a79356c886a52270c10aaffed86c3b35cdb5f6c2",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "expect.js": "~0.2.0",
+    "grunt": "~0.4.1",
+    "grunt-bump": "0.0.11",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-watch": "~0.4.4",
+    "grunt-mocha-test": "^0.10.2",
+    "mocha": "~1.12.0",
+    "nock": "^0.28.3",
+    "request": "~2.22.0",
+    "supertest": "^0.11.0",
+    "grunt-mocha-istanbul": "~1.4.1"
+  }
+}

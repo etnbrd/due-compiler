@@ -1,0 +1,62 @@
+{
+  "name": "gifsockets-server",
+  "description": "Never-ending animated GIFs as a chat system",
+  "version": "0.38.1",
+  "homepage": "http://gifsockets.twolfson.com/",
+  "author": {
+    "name": "Todd Wolfson",
+    "email": "todd@twolfson.com",
+    "url": "http://twolfson.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/twolfson/gifsockets-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/twolfson/gifsockets-server/issues"
+  },
+  "licenses": [
+    {
+      "type": "UNLICENSE",
+      "url": "https://github.com/twolfson/gifsockets-server/blob/master/UNLICENSE"
+    }
+  ],
+  "bin": {
+    "gifsockets-server": "bin/gifsockets-server"
+  },
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node bin/gifsockets-server",
+    "start-phantomjs": "phantomjs-pixel-server",
+    "postinstall": "which phantomjs 2>&1 > /dev/null || npm install phantomjs",
+    "test": "mocha"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "obj-extend": "~0.1.0",
+    "raw-body": "0.0.3",
+    "express": "~3.4.4",
+    "jade": "~0.35.0",
+    "marked": "~0.2.10",
+    "request": "~2.27.0",
+    "gif-encoder": "~0.4.0",
+    "function-to-string": "~0.2.0",
+    "gifsockets": "~0.1.0",
+    "gifsockets-middleware": "~0.1.0",
+    "commander": "~2.0.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-zip": "~0.10.0",
+    "grunt-contrib-jshint": "~0.7.1",
+    "grunt-curl": "~1.2.1",
+    "grunt-contrib-copy": "~0.4.1",
+    "mocha": "~1.14.0",
+    "phantomjs-pixel-server": "~0.1.0",
+    "request": "~2.27.0",
+    "get-pixels": "~1.0.1"
+  }
+}

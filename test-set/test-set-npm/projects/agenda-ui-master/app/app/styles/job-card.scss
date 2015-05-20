@@ -1,0 +1,94 @@
+@import 'variables';
+
+
+.fail-message {
+  line-height: 28px;
+  position: relative;
+  padding: 10px;
+}
+
+.fail-icon {
+  font-size: 18px;
+  position: relative;
+  top: 1px;
+  font-weight: 700px;
+  color: $brand-warning;
+}
+
+.panel-heading {
+  position: relative;
+}
+
+.next-run-counter {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.job-data-preview {
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+  word-wrap: normal;
+  background-color: #f8f8f8;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 13px;
+
+  &.is-expanded {
+    white-space: pre;
+  }
+}
+
+.details-link {
+  text-decoration: none;
+  color: $light-text-color;
+  font-size: 11px;
+}
+
+.job-details {
+  .details {
+    display: none;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  label {
+    width: 110px;
+    text-align: right;
+    display: inline-block;
+    color: #999;
+    margin-right: 4px;
+  }
+
+  &.is-expanded .details {
+    display: block;
+  }
+}
+
+$priority-color-low: $light-text-color;
+$priority-color-high: rgb(194, 124, 0);
+$priority-color-highest: rgb(255, 0, 0);
+
+.meta-item {
+  text-transform: capitalize;
+}
+
+.times {
+  .time-container {
+    display: block;
+  }
+}
+
+.priority.highest {
+  color: $priority-color-highest;
+}
+.priority.high {
+  color: $priority-color-high;
+}
+.priority.low, .priority.lowest {
+  color: $priority-color-low;
+}

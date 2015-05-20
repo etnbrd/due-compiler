@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moonridge browser test suite</title>
+    <!--uncomment es5-shim for IE8 support-->
+    <!--<script type="text/javascript" src="/es5-shim.js"></script>-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+        .left-slide.ng-enter,
+        .left-slide.ng-leave {
+            -webkit-transition: 350ms cubic-bezier(0.390, 0.575, 0.565, 1.000) all;
+            -moz-transition: 350ms cubic-bezier(0.390, 0.575, 0.565, 1.000) all;
+            -ms-transition: 350ms cubic-bezier(0.390, 0.575, 0.565, 1.000) all;
+            -o-transition: 350ms cubic-bezier(0.390, 0.575, 0.565, 1.000) all;
+            transition: 350ms cubic-bezier(0.390, 0.575, 0.565, 1.000) all;
+            position: relative;
+            display: block;
+        }
+
+        .left-slide.ng-enter.left-slide.ng-enter-active,
+        .left-slide.ngleave {
+            opacity: 1;
+            left: 0;
+            height: 30px;
+        }
+
+        .left-slide.ng-leave.left-slide.ng-leave-active,
+        .left-slide.ng-enter {
+            opacity: 0;
+            left: -100px;
+            height: 0px;
+        }
+
+        [ng-click] {
+            cursor: pointer;
+        }
+
+        mr-query-dropdown {
+            margin-top: 20px;
+        }
+    </style>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div mr-controller="testCtrl" mr-models="user,fighter"><!--You must use mr-controller instead of ng-controller-->
+    <button class="btn" ng-click="user()">as User</button>
+    <button class="btn" ng-click="admin()">as Admin</button>
+    <label for="query">Name</label><input type="text" id="query" ng-model='name'>
+    <label for="health">health</label><input type="number" id="health" ng-model='health'>
+    <button ng-click="create()">create</button>
+    <button ng-click="changeQuery()">limit +1</button>
+    <br/>
+
+    <br/>
+    Total documents: <span ng-bind="cLQ.count"></span> || Limit: <input type="number" ng-model="LQ.query.limit[0]">
+
+    <div class="row query-header">
+        <div class="col-md-8">
+            <h1>Find query</h1>
+        </div>
+        <div class="col-md-4">
+            <mr-query-dropdown query="LQ" gui-path-texts="dropdownTexts"></mr-query-dropdown>
+        </div>
+    </div>
+    <p mr-repeat="fighter in LQ" class="left-slide">
+        {{ fighter }}
+        <button ng-click="hit(fighter)">Hit</button>
+        <button ng-click="heal(fighter)">Heal</button>
+        <button ng-click="remove(fighter)">Del</button>
+    </p>
+    <h1>Find One query</h1>
+
+    <p>
+        {{ oneLQ.doc }}
+        <button ng-click="hit(oneLQ.doc)">Hit</button>
+        <button ng-click="heal(oneLQ.doc)">Heal</button>
+        <button ng-click="remove(oneLQ.doc)">Del</button>
+    </p>
+    <h4>Admin: {{admin.doc}}</h4>
+
+</div>
+
+<script src="jspm_packages/system.js"></script>
+<script src="config.js"></script>
+<script type="text/javascript">
+    System.import('showcase').then(function() {
+        var injector = angular.bootstrap(document, ['MRTest']);
+    });
+</script>
+</body>
+</html>

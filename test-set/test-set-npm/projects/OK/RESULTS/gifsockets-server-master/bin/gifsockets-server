@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+
+var GifSocketsServer = require('../');
+
+// Parse CLI options
+var program = require('commander')
+                .version(require('../package.json').version)
+                .option('-p, --port <port>', 'Port to run server on', 8000)
+                .parse(process.argv);
+
+// Create a server and start listening
+var app = new GifSocketsServer();
+app.listen(program.port);
+
+// Notify the user that we are listening
+console.log('gifsockets-server is listening at http://127.0.0.1:' + program.port + '/');

@@ -1,0 +1,34 @@
+{
+  "name": "tingo-rest",
+  "version": "1.0.1",
+  "description": "Minimal Express.js middleware exposing REST-API for TingoDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lean-stack/node.tingo-rest"
+  },
+  "keywords": [
+    "express",
+    "rest",
+    "tingodb"
+  ],
+  "author": "Micha Alt <lean@michael-alt.info>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lean-stack/node.tingo-rest/issues"
+  },
+  "homepage": "https://github.com/lean-stack/node.tingo-rest",
+  "dependencies": {
+    "body-parser": "^1.10.2",
+    "express": "^4.11.1",
+    "tingodb": "^0.3.3"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "mocha": "^2.1.0",
+    "superagent": "^0.21.0"
+  }
+}

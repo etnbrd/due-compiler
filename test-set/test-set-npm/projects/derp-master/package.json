@@ -1,0 +1,42 @@
+{
+  "name": "derpjs",
+  "description": "",
+  "version": "0.2.2",
+  "main": "lib/derp",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/iest/derp"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "co-views": "^0.2.0",
+    "express": "^4.4.3",
+    "jade": "^1.3.1",
+    "koa": "^0.6.2",
+    "koa-logger": "^1.2.1",
+    "koa-route": "^1.1.4",
+    "lodash": "^2.4.1",
+    "marked": "^0.3.2",
+    "moment": "^2.6.0",
+    "rsvp": "^3.0.8",
+    "split": "^0.3.0"
+  },
+  "keywords": [
+    "blog",
+    "blogging",
+    "writing",
+    "markdown",
+    "herp"
+  ],
+  "author": {
+    "name": "Iestyn Williams",
+    "url": "http://iestynwilliams.net"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^1.20.1",
+    "should": "^4.0.4"
+  }
+}

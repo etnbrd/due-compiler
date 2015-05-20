@@ -1,3 +1,0 @@
-setTimeout
-setInterval
-setImmediate

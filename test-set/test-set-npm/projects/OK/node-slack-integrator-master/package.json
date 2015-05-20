@@ -1,0 +1,31 @@
+{
+  "name": "slack-integrator",
+  "version": "0.0.6",
+  "description": "Express-based starter kit for creating Slack integrations",
+  "homepage": "http://github.com/mdb/node-slack-integrator",
+  "main": "integrator.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/mdb/node-slack-integrator.git"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/mocha"
+  },
+  "keywords": [
+    "slack",
+    "slackbot",
+    "slack integration"
+  ],
+  "author": "Mike Ball",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.x.x",
+    "express": "^4.x.x",
+    "request": "^2.51.0"
+  },
+  "devDependencies": {
+    "mocha": "1.14.x",
+    "supertest": "0.15.x",
+    "nock": "0.51.x"
+  }
+}

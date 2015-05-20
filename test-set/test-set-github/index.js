@@ -3,7 +3,7 @@ var ghAPI = require('github'),
 
 // gh.authenticate({
 //   type: "token",
-//   token: "f1d140ccffc8f8173364a90c1859738c2f186feb"
+//   token: "f1d140ccffc8f8173364a90c1859738c2f186feb" // this token is revoked, will need a new token next time
 // });
 
 function displayResults() {

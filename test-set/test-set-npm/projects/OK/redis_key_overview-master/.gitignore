@@ -1,6 +1,0 @@
-node_modules/
-.DS_Store
-keys.csv
-static/html/*
-!static/html/init.html
-config.json

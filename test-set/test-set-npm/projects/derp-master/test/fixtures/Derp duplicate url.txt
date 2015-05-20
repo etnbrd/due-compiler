@@ -1,6 +1,0 @@
-url: first-post
-
-An new post
-==============
-
-Another derpy post

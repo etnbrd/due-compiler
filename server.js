@@ -128,8 +128,10 @@ app.post('/labels/', function(req, res) {
 
 //    LISTEN    //
 
-app.listen(port, addr, function() {
-  console.log(pre('-'), 'server listening on ' + addr.bold + ':' + port.bold);  
-});
+// app.listen(port, addr, function() {
+//   console.log(pre('-'), 'server listening on ' + addr.bold + ':' + port.bold);  
+// });
+
+app.listen(8080);
 
 module.exports = app;

@@ -6,10 +6,7 @@ var fs = require('fs'),
 
 var app = express(),
     bkup = false,
-    bkupfile = '',
-    addr = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1',
-    port = (process.env.OPENSHIFT_NODEJS_PORT || 8080).toString();
-
+    bkupfile = '';
 
 
 var labels = {
@@ -127,10 +124,6 @@ app.post('/labels/', function(req, res) {
 })
 
 //    LISTEN    //
-
-// app.listen(port, addr, function() {
-//   console.log(pre('-'), 'server listening on ' + addr.bold + ':' + port.bold);  
-// });
 
 app.listen(8080);
 
